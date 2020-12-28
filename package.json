@@ -1,0 +1,22 @@
+{
+  "name": "aave-liquidation",
+  "version": "1.0.0",
+  "description": "This is an attempt to create a Aave liquidation bot using Flash Loans :)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FernandoMeiraFilho/aave-liquidation.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FernandoMeiraFilho/aave-liquidation/issues"
+  },
+  "homepage": "https://github.com/FernandoMeiraFilho/aave-liquidation#readme",
+  "dependencies": {
+    "ethers": "^5.0.24"
+  }
+}
