@@ -1,0 +1,7 @@
+- Create sanityCheck mechanism to test the queries
+- Create a Graph Query
+- Check graph validity - is it updated every block?
+- Create a db buffer connected to Eth price (using same oracle as Aave) to account for exposed accounts
+- Create contract to execute the liquidatation (using flash loans)
+- Find a way to execute the transaction on my node
+- Hope it works and don;t be frontrunned and be happy
