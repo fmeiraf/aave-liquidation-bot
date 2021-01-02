@@ -17,6 +17,11 @@
   },
   "homepage": "https://github.com/FernandoMeiraFilho/aave-liquidation#readme",
   "dependencies": {
-    "ethers": "^5.0.24"
+    "@apollo/client": "^3.3.6",
+    "axios": "^0.21.1",
+    "bignumber.js": "^9.0.1",
+    "ethers": "^5.0.24",
+    "graphql": "^15.4.0",
+    "js-sha3": "^0.8.0"
   }
 }

@@ -1,7 +1,8 @@
-- Create sanityCheck mechanism to test the queries
-- Create a Graph Query
-- Check graph validity - is it updated every block?
-- Create a db buffer connected to Eth price (using same oracle as Aave) to account for exposed accounts
-- Create contract to execute the liquidatation (using flash loans)
+- set up th graphql queries and updates
+- update internal db with events
+- use aave-js package to calculate parameters and create a queue for liquidation
+- use hardhat to create a test for executing the transaction on a given block
+- create solidity code for the flash loan call
 - Find a way to execute the transaction on my node
-- Hope it works and don;t be frontrunned and be happy
+- deploy bot
+- Hope it works and don't be frontrunned and be happy
