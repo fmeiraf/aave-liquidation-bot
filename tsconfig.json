@@ -1,9 +1,9 @@
 {
   "include": ["src", "types", "test"],
   "compilerOptions": {
-    "target": "es5",
-    "module": "esnext",
-    "lib": ["dom", "esnext"],
+    "target": "ESNext",
+    "module": "CommonJS",
+    "lib": ["dom", "ES6"],
     "importHelpers": true,
     "declaration": true,
     "sourceMap": true,
@@ -14,6 +14,8 @@
     "strictFunctionTypes": true,
     "strictPropertyInitialization": true,
     "noImplicitThis": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "alwaysStrict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -25,6 +27,7 @@
       "*": ["src/*", "node_modules/*"]
     },
     "jsx": "react",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "outDir": "./build"
   }
 }
