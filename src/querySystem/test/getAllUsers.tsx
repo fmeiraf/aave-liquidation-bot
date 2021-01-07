@@ -1,32 +1,5 @@
-import { client } from "../../apollo/clientConfig";
-import { gql } from "@apollo/client/core";
-import { UserReserve } from "../graphql/fragments";
+import { getAllUsers } from "../graphql/queries";
 import { performance } from "perf_hooks";
-
-const query: any = async function(n: number, pagination: number): Promise<any> {
-  const result: any = await client.query({
-    query: gql`
-      query getUsers($n: Int, $pagination: Int) {
-        users(first: $n, skip: $pagination) {
-          id
-          reserves {
-            ...UserReserveData
-          }
-        }
-      }
-      ${UserReserve.fragment}
-    `,
-    variables: { n: n, pagination: pagination },
-  });
-
-  console.log(result.data.users.length);
-
-  if (result.data.users.length === 0) {
-    return "Done";
-  }
-
-  return result.data.users;
-};
 
 async function execute_query() {
   let n_: number = 100;
@@ -36,7 +9,7 @@ async function execute_query() {
   const t0 = performance.now();
   while (pag_ <= 50000) {
     console.log(`We are at pagination ${pag_}`);
-    let new_content = await query(n_, pag_);
+    let new_content = await getAllUsers(n_, pag_);
 
     if (new_content === "Done") {
       break;
