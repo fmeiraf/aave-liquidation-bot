@@ -30,3 +30,22 @@ export const getAllUsers: any = async function(
 
   return result.data.users;
 };
+
+export const loadInitialUsers: any = async function() {
+  let n_: number = 100;
+  let pag_: number = 0;
+  let allUsers: Array<any> = [];
+
+  while (pag_ <= 50000) {
+    console.log(`We are at pagination ${pag_}`);
+    let new_content = await getAllUsers(n_, pag_);
+
+    if (new_content === "Done") {
+      break;
+    }
+    allUsers = allUsers.concat(new_content);
+    pag_ += 100;
+  }
+
+  return allUsers;
+};
