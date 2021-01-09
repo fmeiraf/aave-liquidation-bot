@@ -4,6 +4,10 @@ import FileSync from "lowdb/adapters/FileSync";
 import chalk from "chalk";
 import path from "path";
 import { promises as fsPromises } from "fs";
+import { Schema } from "./dbTypes";
+import { getLastTimestamps } from "./graphql/queries";
+
+// types for the db schema
 
 // import { loadInitialUsers } from "./graphql/queries";
 
@@ -14,32 +18,38 @@ async function start() {
   try {
     console.log(chalk.greenBright("### Starting Query System .. ###"));
 
-    //check if db.json exists, if not, create file
+    //check if db.json exists, if not, create db and initial run config
     if (!fs.existsSync(db_path)) {
       await fsPromises.writeFile(db_path, "");
       console.log(chalk.yellow("Created new DB file "));
     }
 
     //create default format for db
-    const adapter = new (FileSync as any)(db_path);
+    const adapter = new FileSync<Schema>(db_path);
     const db = await low(adapter);
 
     db.defaults({
       users: [],
-      lasEventTimestamp: {},
-      generalReserves: [],
+      lastEventTimestamp: [],
+      // generalReserves: [],
     }).write();
 
-    // get last index of events of interest to use on updates
-
-    // call the initial query getting all userReserves
+    // insert into db timestamp of the last update
     console.log(chalk.green("Loading initial data.."));
 
-    // db.get("users")
-    //   .push({ address: "accbbfd", reservers: [{ a: 1 }, { b: 2 }] })
-    //   .write();
+    const latestTimestamps = await getLastTimestamps();
+    db.set("lastEventTimestamp", latestTimestamps).write();
+
+    // fill with with all users
 
     // const initialData = await loadInitialUsers();
+
+    // db.get("users").push({
+    //   address: "accbbfd",
+    //   reserves: [{ a: 1 }, { b: 2 }],
+    // });
+
+    // db.set("users[0]").write();
 
     // start querying for events of interest using the last index from
     // previous step
