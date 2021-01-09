@@ -117,3 +117,5 @@ dist
 
 # build folder
 build/
+
+db/

@@ -1,5 +1,39 @@
 {
-  "users": [],
+  "users": [
+    {
+      "address": "accbbfd",
+      "reservers": [
+        {
+          "a": 1
+        },
+        {
+          "b": 2
+        }
+      ]
+    }
+  ],
   "lasEventTimestamp": {},
-  "generalReserves": []
+  "generalReserves": [],
+  "lastEventTimestamp": [
+    {
+      "eventName": "Deposit",
+      "timestamp": 1610214680
+    },
+    {
+      "eventName": "Borrow",
+      "timestamp": 1610214964
+    },
+    {
+      "eventName": "LiquidationCall",
+      "timestamp": 1610041920
+    },
+    {
+      "eventName": "Repay",
+      "timestamp": 1610205364
+    },
+    {
+      "eventName": "Swap",
+      "timestamp": 1609835792
+    }
+  ]
 }
