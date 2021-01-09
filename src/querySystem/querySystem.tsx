@@ -5,7 +5,7 @@ import chalk from "chalk";
 import path from "path";
 import { promises as fsPromises } from "fs";
 import { Schema } from "./dbTypes";
-import { getLastTimestamps } from "./graphql/queries";
+import { getLastTimestamps, loadInitialUsers } from "./graphql/queries";
 
 // types for the db schema
 
@@ -42,12 +42,12 @@ async function start() {
 
     // fill with with all users
 
-    // const initialData = await loadInitialUsers();
+    const initialUsers: any = await loadInitialUsers();
 
-    // db.get("users").push({
-    //   address: "accbbfd",
-    //   reserves: [{ a: 1 }, { b: 2 }],
-    // });
+    db.get("users")
+      .push(initialUsers[0])
+      .push(initialUsers[1])
+      .write();
 
     // db.set("users[0]").write();
 

@@ -23,8 +23,6 @@ export const getAllUsers: any = async function(
     variables: { n: n, pagination: pagination },
   });
 
-  console.log(result.data.users.length);
-
   if (result.data.users.length === 0) {
     return "Done";
   }
@@ -38,7 +36,6 @@ export const loadInitialUsers: any = async function() {
   let allUsers: Array<any> = [];
 
   while (pag_ <= 50000) {
-    console.log(`We are at pagination ${pag_}`);
     let new_content = await getAllUsers(n_, pag_);
 
     if (new_content === "Done") {
@@ -48,6 +45,7 @@ export const loadInitialUsers: any = async function() {
     pag_ += 100;
   }
 
+  console.log(`${allUsers.length} users added.`);
   return allUsers;
 };
 
