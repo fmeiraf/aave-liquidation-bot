@@ -1,6 +1,10 @@
-- create initial script that builds localdb with all user reserves
+## ROADMAP
+
+X - create initial script that builds localdb with all user reserves
+
 - create script that will look for events and request the new userReserve of that user, then update DB
 - create a script that will request all reserves updated and store it in db
+- create script to get updated reserve data
 - update aave-js package to use the new Graphs (old one is using different fields)
 - find minimal calculation to keep in the db to classify potential liquidation opportunities
 - use aave-js package to calculate parameters and create a queue for liquidation
