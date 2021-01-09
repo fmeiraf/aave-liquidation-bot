@@ -1,30 +1,34 @@
 export type ReserveData = {
+  __typename: string;
   id: string;
-  underlyingAsset: number;
+  underlyingAsset: string;
   name: string;
   symbol: string;
   decimals: number;
-  liquidityRate: number;
-  reserveLiquidationBonus: number;
+  liquidityRate: string;
+  reserveLiquidationBonus: string;
   lastUpdateTimestamp: number;
   aToken: {
+    __typename: string;
     id: string;
   };
 };
 
 export type UserReserve = {
+  __typename: string;
   currentATokenBalance: number;
   scaledATokenBalance: number;
   reserve: ReserveData[];
   usageAsCollateralEnabledOnUser: boolean;
-  stableBorrowRate: number;
-  principalStableDebt: number;
-  currentVariableDebt: number;
-  variableBorrowIndex: number;
+  stableBorrowRate: string;
+  principalStableDebt: string;
+  currentVariableDebt: string;
+  variableBorrowIndex: string;
   lastUpdateTimestamp: number;
 };
 
 export type User = {
+  __typename: string;
   address: string;
   reserves: UserReserve[];
 };
