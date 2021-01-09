@@ -1,6 +1,7 @@
 import { client } from "../../apollo/clientConfig";
 import { gql } from "@apollo/client/core";
 import { UserReserve } from "./fragments";
+import _ from "lodash";
 
 // query to get all userResere data from all users, pagination optimzed
 export const getAllUsers: any = async function(
@@ -48,4 +49,40 @@ export const loadInitialUsers: any = async function() {
   }
 
   return allUsers;
+};
+
+export const getLastTimestamps: any = async () => {
+  const result: any = await client.query({
+    query: gql`
+      query getUpdateTimestamps {
+        deposits(first: 1, orderBy: timestamp, orderDirection: desc) {
+          timestamp
+        }
+        borrows(first: 1, orderBy: timestamp, orderDirection: desc) {
+          timestamp
+        }
+        liquidationCalls(first: 1, orderBy: timestamp, orderDirection: desc) {
+          timestamp
+        }
+        repays(first: 1, orderBy: timestamp, orderDirection: desc) {
+          timestamp
+        }
+        swaps(first: 1, orderBy: timestamp, orderDirection: desc) {
+          timestamp
+        }
+      }
+    `,
+  });
+
+  //format query to pass it to db
+  let eventTimestamps: any = [];
+
+  _.map(result.data, (obj) => {
+    eventTimestamps.push({
+      eventName: obj[0].__typename,
+      timestamp: obj[0].timestamp,
+    });
+  });
+
+  return eventTimestamps;
 };
