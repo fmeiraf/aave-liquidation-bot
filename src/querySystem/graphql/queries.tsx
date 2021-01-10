@@ -1,6 +1,7 @@
 import { client } from "../../apollo/clientConfig";
 import { gql } from "@apollo/client/core";
 import { UserReserve } from "./fragments";
+import { User } from "../dbTypes";
 import _ from "lodash";
 
 // query to get all userResere data from all users, pagination optimzed
@@ -33,7 +34,7 @@ export const getAllUsers: any = async function(
 export const loadInitialUsers: any = async function() {
   let n_: number = 100;
   let pag_: number = 0;
-  let allUsers: Array<any> = [];
+  let allUsers: Array<User> = [];
 
   while (pag_ <= 50000) {
     let new_content = await getAllUsers(n_, pag_);
@@ -83,4 +84,120 @@ export const getLastTimestamps: any = async () => {
   });
 
   return eventTimestamps;
+};
+
+export const getUsersToUpdate: any = async (
+  borrowLast: number,
+  depositLast: number,
+  liquidationLast: number,
+  repayLast: number,
+  swapLast: number
+) => {
+  const result: any = await client.query({
+    query: gql`
+      query udpateUserData(
+        $borrowLast: Int
+        $depositLast: Int
+        $liquidationLast: Int
+        $repayLast: Int
+        $swapLast: Int
+      ) {
+        deposits(
+          where: { timestamp_gt: $depositLast }
+          orderBy: timestamp
+          orderDirection: desc
+        ) {
+          user {
+            id
+          }
+        }
+        borrows(
+          where: { timestamp_gt: $borrowLast }
+          orderBy: timestamp
+          orderDirection: desc
+        ) {
+          user {
+            id
+          }
+        }
+        liquidationCalls(
+          where: { timestamp_gt: $liquidationLast }
+          orderBy: timestamp
+          orderDirection: desc
+        ) {
+          user {
+            id
+          }
+        }
+        repays(
+          where: { timestamp_gt: $repayLast }
+          orderBy: timestamp
+          orderDirection: desc
+        ) {
+          user {
+            id
+          }
+        }
+        swaps(
+          where: { timestamp_gt: $swapLast }
+          orderBy: timestamp
+          orderDirection: desc
+        ) {
+          user {
+            id
+          }
+        }
+      }
+    `,
+    variables: {
+      borrowLast: borrowLast,
+      depositLast: depositLast,
+      liquidationLast: liquidationLast,
+      repayLast: repayLast,
+      swapLast: swapLast,
+    },
+  });
+
+  //format query to pass it to db
+  const events: Array<string> = [
+    "borrows",
+    "deposits",
+    "liquidationCalls",
+    "repays",
+    "swaps",
+  ];
+  let usersToUpdate: Array<string> = [];
+
+  for (var event of events) {
+    if (result.data[event] !== []) {
+      _.map(result.data[event], (obj) => {
+        usersToUpdate.push(obj.user.id);
+      });
+    }
+  }
+
+  return _.uniq(usersToUpdate);
+};
+
+export const getUserData: any = async function(
+  userAddress: string
+): Promise<any> {
+  const result = await client.query({
+    query: gql`
+      query getUserData($userId: String) {
+        user(id: $userId) {
+          id
+          reserves {
+            ...UserReserveData
+          }
+        }
+      }
+      ${UserReserve.fragment}
+    `,
+    variables: {
+      userId: userAddress,
+    },
+  });
+
+  return result.data.user;
 };
