@@ -29,12 +29,12 @@ export type UserReserve = {
 
 export type User = {
   __typename: string;
-  address: string;
+  id: string;
   reserves: UserReserve[];
 };
 
 export type lastEventTimestamp = {
-  eventName: string;
+  eventName: number;
   timestamp: number;
 };
 
