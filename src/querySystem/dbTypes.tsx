@@ -42,3 +42,46 @@ export type Schema = {
   users: User[];
   lastEventTimestamps: lastEventTimestamp[];
 };
+
+export type poolReserve = {
+  id: string;
+  underlyingAsset: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  isActive: boolean;
+  isFrozen: boolean;
+  usageAsCollateralEnabled: boolean;
+  borrowingEnabled: boolean;
+  stableBorrowRateEnabled: boolean;
+  baseLTVasCollateral: string;
+  optimalUtilisationRate: string;
+  averageStableRate: string;
+  stableRateSlope1: string;
+  stableRateSlope2: string;
+  baseVariableBorrowRate: string;
+  variableRateSlope1: string;
+  variableRateSlope2: string;
+  liquidityIndex: string;
+  reserveLiquidationThreshold: string;
+  variableBorrowIndex: string;
+  aToken: {
+    __typename: string;
+    id: string;
+  };
+  availableLiquidity: string;
+  stableBorrowRate: string;
+  liquidityRate: string;
+  totalPrincipalStableDebt: string;
+  totalScaledVariableDebt: string;
+  totalCurrentVariableDebt: string;
+  totalLiquidity: string;
+  utilizationRate: string;
+  reserveLiquidationBonus: string;
+  variableBorrowRate: string;
+  price: {
+    __typename: string;
+    priceInEth: string;
+  };
+  lastUpdateTimestamp: number;
+};
