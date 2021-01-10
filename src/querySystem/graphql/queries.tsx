@@ -1,6 +1,6 @@
 import { client } from "../../apollo/clientConfig";
 import { gql } from "@apollo/client/core";
-import { UserReserve } from "./fragments";
+import { UserReserve, ReserveData } from "./fragments";
 import { User } from "../dbTypes";
 import _ from "lodash";
 
@@ -200,4 +200,19 @@ export const getUserData: any = async function(
   });
 
   return result.data.user;
+};
+
+export const getReservesData: any = async function() {
+  const result: any = await client.query({
+    query: gql`
+      query getReserves {
+        reserves {
+          ...ReserveData
+        }
+      }
+      ${ReserveData.fragment}
+    `,
+  });
+
+  return result.data.reserves;
 };

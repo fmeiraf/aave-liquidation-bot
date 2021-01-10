@@ -31,3 +31,48 @@ export const UserReserve: FragmentObject = {
     }
   `,
 };
+
+export const ReserveData: FragmentObject = {
+  fragment: gql`
+    fragment ReserveData on Reserve {
+      id
+      underlyingAsset
+      name
+      symbol
+      decimals
+      isActive
+      isFrozen
+      usageAsCollateralEnabled
+      borrowingEnabled
+      stableBorrowRateEnabled
+      baseLTVasCollateral
+      optimalUtilisationRate
+      averageStableRate
+      stableRateSlope1
+      stableRateSlope2
+      baseVariableBorrowRate
+      variableRateSlope1
+      variableRateSlope2
+      liquidityIndex
+      reserveLiquidationThreshold
+      variableBorrowIndex
+      aToken {
+        id
+      }
+      availableLiquidity
+      stableBorrowRate
+      liquidityRate
+      totalPrincipalStableDebt
+      totalScaledVariableDebt
+      totalCurrentVariableDebt
+      totalLiquidity
+      utilizationRate
+      reserveLiquidationBonus
+      variableBorrowRate
+      price {
+        priceInEth
+      }
+      lastUpdateTimestamp
+    }
+  `,
+};
