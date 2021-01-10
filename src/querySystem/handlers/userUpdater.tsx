@@ -9,7 +9,7 @@ import updateLastEventsTimestamps from "./updateLastEventTimestamps";
 
 const db_path = path.resolve(__dirname, "../../../../src/db/db.json");
 
-export const updateUsers = async () => {
+const updateUsers = async () => {
   console.log(chalk.cyan("Starting user update check."));
   const adapter = new FileSync<Schema>(db_path);
   const db = await low(adapter);
@@ -82,4 +82,4 @@ export const updateUsers = async () => {
   console.log(chalk.cyan("Finished user update check."));
 };
 
-updateUsers();
+export default updateUsers;
