@@ -41,6 +41,7 @@ export type lastEventTimestamp = {
 export type Schema = {
   users: User[];
   lastEventTimestamps: lastEventTimestamp[];
+  poolReserves: poolReserve[];
 };
 
 export type poolReserve = {
