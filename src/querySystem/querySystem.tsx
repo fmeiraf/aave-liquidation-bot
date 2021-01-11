@@ -7,6 +7,7 @@ import { promises as fsPromises } from "fs";
 import { Schema } from "./dbTypes";
 import { loadInitialUsers } from "./graphql/queries";
 import updateLastEventsTimestamps from "./handlers/updateLastEventTimestamps";
+import updatePoolReserves from "./handlers/updatePoolReserves";
 
 // types for the db schema
 
@@ -29,19 +30,21 @@ async function start() {
       db.defaults({
         users: [],
         lastEventTimestamps: [],
-        // generalReserves: [],
+        poolReserves: [],
       }).write();
 
       // insert into db timestamp of the last update
       console.log(chalk.green("Loading initial data.."));
-
-      updateLastEventsTimestamps();
 
       // fill with with all users
 
       const initialUsers: any = await loadInitialUsers();
 
       db.set("users", [initialUsers[0]]).write();
+
+      // fill with poolReserves and EventsTimestamps last data
+      await updatePoolReserves();
+      await updateLastEventsTimestamps();
     }
 
     console.log(chalk.bold.greenBright("### Starting Watch Mode .. ###"));
