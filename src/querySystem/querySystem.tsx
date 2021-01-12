@@ -40,7 +40,7 @@ async function start() {
 
       const initialUsers: any = await loadInitialUsers();
 
-      db.set("users", [initialUsers[0]]).write();
+      db.set("users", [initialUsers]).write();
 
       // fill with poolReserves and EventsTimestamps last data
       await updatePoolReserves();
