@@ -6,6 +6,8 @@ X - create a script that will request all reserves updated and store it in db
 X - create script to get updated reserve data
 
 - update aave-js package to use the new Graphs (old one is using different fields)
+  - Fixed the total Borrows with stable and variable debt sum
+  - create tests to compare this data with on chain - go on parts, exploring each macro comming from ILendingPool > getUserAccountData()
 - find minimal calculation to keep in the db to classify potential liquidation opportunities
 - use aave-js package to calculate parameters and create a queue for liquidation
 - create solidity code for the flash loan call
