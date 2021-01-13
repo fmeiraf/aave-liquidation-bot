@@ -22,6 +22,7 @@
     "@apollo/client": "^3.3.6",
     "@types/dotenv": "^8.2.0",
     "@types/fs-extra": "^9.0.6",
+    "@types/jest": "^26.0.20",
     "@types/lodash": "^4.14.167",
     "@types/lowdb": "^1.0.9",
     "axios": "^0.21.1",
