@@ -15,7 +15,7 @@
     "strictPropertyInitialization": true,
     "noImplicitThis": true,
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
+    "resolveJsonModule": true,
     "alwaysStrict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
