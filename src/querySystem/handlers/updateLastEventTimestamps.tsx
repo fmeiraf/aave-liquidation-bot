@@ -13,7 +13,6 @@ const updateLastEventsTimestamps: any = async () => {
   const db = await low(adapter);
 
   const latestTimestamps = await getLastTimestamps();
-  console.log(latestTimestamps);
   db.set("lastEventTimestamps", latestTimestamps).write();
 
   console.log(chalk.magenta("Updated last event timestamps!"));
