@@ -16,8 +16,8 @@ export type ReserveData = {
 
 export type UserReserve = {
   __typename: string;
-  currentATokenBalance: number;
-  scaledATokenBalance: number;
+  currentATokenBalance: string;
+  scaledATokenBalance: string;
   reserve: ReserveData[];
   usageAsCollateralEnabledOnUser: boolean;
   stableBorrowRate: string;
