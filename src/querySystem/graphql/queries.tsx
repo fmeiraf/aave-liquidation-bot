@@ -107,7 +107,7 @@ export const getUsersToUpdate: any = async (
           orderBy: timestamp
           orderDirection: desc
         ) {
-          user {
+          onBehalfOf {
             id
           }
         }
@@ -116,7 +116,7 @@ export const getUsersToUpdate: any = async (
           orderBy: timestamp
           orderDirection: desc
         ) {
-          user {
+          onBehalfOf {
             id
           }
         }
@@ -134,7 +134,7 @@ export const getUsersToUpdate: any = async (
           orderBy: timestamp
           orderDirection: desc
         ) {
-          user {
+          onBehalfOf {
             id
           }
         }
@@ -171,7 +171,11 @@ export const getUsersToUpdate: any = async (
   for (var event of events) {
     if (result.data[event] !== []) {
       _.map(result.data[event], (obj) => {
-        usersToUpdate.push(obj.user.id);
+        if (event === "swaps" || event == "liquidationCalls") {
+          usersToUpdate.push(obj.user.id);
+        } else {
+          usersToUpdate.push(obj.onBehalfOf.id);
+        }
       });
     }
   }

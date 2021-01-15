@@ -8,6 +8,7 @@ import { Schema } from "./dbTypes";
 import { loadInitialUsers } from "./graphql/queries";
 import updateLastEventsTimestamps from "./handlers/updateLastEventTimestamps";
 import updatePoolReserves from "./handlers/updatePoolReserves";
+import updateUsers from "./handlers/userUpdater";
 
 // types for the db schema
 
@@ -40,7 +41,7 @@ async function start() {
 
       const initialUsers: any = await loadInitialUsers();
 
-      db.set("users", [initialUsers]).write();
+      db.set("users", initialUsers).write();
 
       // fill with poolReserves and EventsTimestamps last data
       await updatePoolReserves();
@@ -48,6 +49,8 @@ async function start() {
     }
 
     console.log(chalk.bold.greenBright("### Starting Watch Mode .. ###"));
+    // debug only
+    await updateUsers();
 
     // start querying for events of interest using the last index from
     // previous step
