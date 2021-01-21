@@ -7,7 +7,6 @@ interface FragmentObject {
 export const UserReserve: FragmentObject = {
   fragment: gql`
     fragment UserReserveData on UserReserve {
-      currentATokenBalance
       scaledATokenBalance
       reserve {
         id
@@ -24,8 +23,9 @@ export const UserReserve: FragmentObject = {
       }
       usageAsCollateralEnabledOnUser
       stableBorrowRate
+      stableBorrowLastUpdateTimestamp
       principalStableDebt
-      currentVariableDebt
+      scaledVariableDebt
       variableBorrowIndex
       lastUpdateTimestamp
     }
@@ -53,26 +53,33 @@ export const ReserveData: FragmentObject = {
       baseVariableBorrowRate
       variableRateSlope1
       variableRateSlope2
+      variableBorrowIndex
+      variableBorrowRate
+      totalScaledVariableDebt
       liquidityIndex
       reserveLiquidationThreshold
-      variableBorrowIndex
       aToken {
+        id
+      }
+      vToken {
+        id
+      }
+      sToken {
         id
       }
       availableLiquidity
       stableBorrowRate
       liquidityRate
       totalPrincipalStableDebt
-      totalScaledVariableDebt
-      totalCurrentVariableDebt
       totalLiquidity
       utilizationRate
       reserveLiquidationBonus
-      variableBorrowRate
       price {
         priceInEth
       }
       lastUpdateTimestamp
+      stableDebtLastUpdateTimestamp
+      reserveFactor
     }
   `,
 };

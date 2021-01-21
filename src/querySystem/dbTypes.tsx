@@ -16,15 +16,14 @@ export type ReserveData = {
 
 export type UserReserve = {
   __typename: string;
-  currentATokenBalance: string;
-  scaledATokenBalance: string;
   reserve: ReserveData[];
+  scaledATokenBalance: string;
   usageAsCollateralEnabledOnUser: boolean;
+  scaledVariableDebt: string;
+  variableBorrowIndex: string;
   stableBorrowRate: string;
   principalStableDebt: string;
-  currentVariableDebt: string;
-  variableBorrowIndex: string;
-  lastUpdateTimestamp: number;
+  stableBorrowLastUpdateTimestamp: number;
 };
 
 export type User = {
@@ -45,7 +44,7 @@ export type Schema = {
 };
 
 export type poolReserve = {
-  id: string;
+  d: string;
   underlyingAsset: string;
   name: string;
   symbol: string;
@@ -53,36 +52,35 @@ export type poolReserve = {
   isActive: boolean;
   isFrozen: boolean;
   usageAsCollateralEnabled: boolean;
+  aTokenAddress: string;
+  stableDebtTokenAddress: string;
+  variableDebtTokenAddress: string;
   borrowingEnabled: boolean;
   stableBorrowRateEnabled: boolean;
+  reserveFactor: string;
   baseLTVasCollateral: string;
   optimalUtilisationRate: string;
-  averageStableRate: string;
   stableRateSlope1: string;
   stableRateSlope2: string;
+  averageStableRate: string;
+  stableDebtLastUpdateTimestamp: number;
   baseVariableBorrowRate: string;
   variableRateSlope1: string;
   variableRateSlope2: string;
   liquidityIndex: string;
   reserveLiquidationThreshold: string;
+  reserveLiquidationBonus: string;
   variableBorrowIndex: string;
-  aToken: {
-    __typename: string;
-    id: string;
-  };
+  variableBorrowRate: string;
+  avg30DaysVariableBorrowRate?: string;
   availableLiquidity: string;
   stableBorrowRate: string;
   liquidityRate: string;
+  avg30DaysLiquidityRate?: string;
   totalPrincipalStableDebt: string;
   totalScaledVariableDebt: string;
-  totalCurrentVariableDebt: string;
-  totalLiquidity: string;
-  utilizationRate: string;
-  reserveLiquidationBonus: string;
-  variableBorrowRate: string;
+  lastUpdateTimestamp: number;
   price: {
-    __typename: string;
     priceInEth: string;
   };
-  lastUpdateTimestamp: number;
 };
