@@ -16,7 +16,16 @@ export type ReserveData = {
 
 export type UserReserve = {
   __typename: string;
-  reserve: ReserveData[];
+  reserve: {
+    id: string;
+    underlyingAsset: string;
+    name: string;
+    symbol: string;
+    decimals: number;
+    liquidityRate: string;
+    reserveLiquidationBonus: string;
+    lastUpdateTimestamp: number;
+  };
   scaledATokenBalance: string;
   usageAsCollateralEnabledOnUser: boolean;
   scaledVariableDebt: string;
@@ -44,7 +53,7 @@ export type Schema = {
 };
 
 export type poolReserve = {
-  d: string;
+  id: string;
   underlyingAsset: string;
   name: string;
   symbol: string;
@@ -83,4 +92,55 @@ export type poolReserve = {
   price: {
     priceInEth: string;
   };
+};
+
+export type ReserveRatesData = {
+  id: string;
+  symbol: string;
+  paramsHistory: {
+    variableBorrowIndex: string;
+    liquidityIndex: string;
+    timestamp: number;
+  }[];
+};
+
+export type ComputedReserveData = {
+  utilizationRate: string;
+  totalStableDebt: string;
+  totalVariableDebt: string;
+  totalDebt: string;
+  totalLiquidity: string;
+} & ReserveData;
+
+export type ComputedUserReserve = UserReserve & {
+  underlyingBalance: string;
+  underlyingBalanceETH: string;
+  underlyingBalanceUSD: string;
+
+  variableBorrows: string;
+  variableBorrowsETH: string;
+  variableBorrowsUSD: string;
+
+  stableBorrows: string;
+  stableBorrowsETH: string;
+  stableBorrowsUSD: string;
+
+  totalBorrows: string;
+  totalBorrowsETH: string;
+  totalBorrowsUSD: string;
+};
+
+export type UserSummaryData = {
+  id: string;
+  totalLiquidityETH: string;
+  totalLiquidityUSD: string;
+  totalCollateralETH: string;
+  totalCollateralUSD: string;
+  totalBorrowsETH: string;
+  totalBorrowsUSD: string;
+  availableBorrowsETH: string;
+  currentLoanToValue: string;
+  currentLiquidationThreshold: string;
+  healthFactor: string;
+  reservesData: ComputedUserReserve[];
 };
