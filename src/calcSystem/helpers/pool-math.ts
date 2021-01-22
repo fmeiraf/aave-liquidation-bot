@@ -47,7 +47,6 @@ export function getCompoundedBalance(
   );
   const cumulatedInterest = RayMath.rayMul(compoundedInterest, _reserveIndex);
   const principalBalanceRay = RayMath.wadToRay(principalBalance);
-
   return RayMath.rayToWad(
     RayMath.rayMul(principalBalanceRay, cumulatedInterest)
   );
@@ -69,6 +68,7 @@ export function getCompoundedStableBalance(
     currentTimestamp,
     _lastUpdateTimestamp
   );
+
   const principalBalanceRay = RayMath.wadToRay(principalBalance);
 
   return RayMath.rayToWad(
