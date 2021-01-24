@@ -9,11 +9,11 @@ import chalk from "chalk";
 const userReserveTest = async () => {
   const currentTimeStamp = Math.round(Date.now() / 1000);
 
-  const [
+  const {
     userReserveOnChain,
     userDaiReserve,
     daiReserveDB,
-  ] = await getCommonInfo();
+  } = await getCommonInfo();
 
   const computedUserReserve = computeUserReserveData(
     daiReserveDB,
