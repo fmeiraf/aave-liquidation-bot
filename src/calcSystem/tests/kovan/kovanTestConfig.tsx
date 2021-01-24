@@ -3,6 +3,10 @@ import { INFURA_KOVAN } from "../../../env";
 import abiAddress from "../../../ABIs/abiAddress";
 import ProtocolDAtaProviderABI from "../../../ABIs/ProtocolDataProvider.json";
 
+import dbConn from "../../../dbConnection";
+import _ from "lodash";
+import { poolReserve } from "../../../querySystem/dbTypes";
+
 //addresses
 export const daiAddress = "0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD";
 export const daiAddressLower = "0xff795577d9ac8bd7d90ee22b6c1703490b6512fd";
@@ -17,3 +21,31 @@ export const protocolDataProvider = new ethers.Contract(
   ProtocolDAtaProviderABI,
   provider
 );
+
+// common info for tests
+export async function getCommonInfo() {
+  const userReserveOnChain = await protocolDataProvider.getUserReserveData(
+    daiAddress,
+    ethers.utils.getAddress(testAddressLower)
+  );
+
+  const userReservesDB = await dbConn
+    .get("users")
+    .find({
+      id: testAddressLower,
+    })
+    .value();
+
+  const userDaiReserve: any = _.find(userReservesDB["reserves"], {
+    reserve: { symbol: "DAI" },
+  });
+
+  const daiReserveDB: poolReserve = await dbConn
+    .get("poolReserves")
+    .find({
+      symbol: "DAI",
+    })
+    .value();
+
+  return [userReserveOnChain, userDaiReserve, daiReserveDB];
+}

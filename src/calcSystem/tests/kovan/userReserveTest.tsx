@@ -1,41 +1,19 @@
-import {
-  daiAddress,
-  testAddressLower,
-  protocolDataProvider,
-} from "./kovanTestConfig";
-import { poolReserve } from "../../../querySystem/dbTypes";
+import { getCommonInfo } from "./kovanTestConfig";
+
 import { computeUserReserveData } from "../../helpers/main-calcs";
 import { normalizeNoDecimals } from "../../helpers/pool-math";
 
-import { ethers } from "ethers";
-import dbConn from "../../../dbConnection";
 import _ from "lodash";
 import chalk from "chalk";
 
 const userReserveTest = async () => {
   const currentTimeStamp = Math.round(Date.now() / 1000);
-  const userReserveOnChain = await protocolDataProvider.getUserReserveData(
-    daiAddress,
-    ethers.utils.getAddress(testAddressLower)
-  );
 
-  const userReservesDB = await dbConn
-    .get("users")
-    .find({
-      id: testAddressLower,
-    })
-    .value();
-
-  const userDaiReserve: any = _.find(userReservesDB["reserves"], {
-    reserve: { symbol: "DAI" },
-  });
-
-  const daiReserveDB: poolReserve = await dbConn
-    .get("poolReserves")
-    .find({
-      symbol: "DAI",
-    })
-    .value();
+  const [
+    userReserveOnChain,
+    userDaiReserve,
+    daiReserveDB,
+  ] = await getCommonInfo();
 
   const computedUserReserve = computeUserReserveData(
     daiReserveDB,
