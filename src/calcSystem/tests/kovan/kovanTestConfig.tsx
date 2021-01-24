@@ -2,6 +2,7 @@ import { ethers } from "ethers";
 import { INFURA_KOVAN } from "../../../env";
 import abiAddress from "../../../ABIs/abiAddress";
 import ProtocolDAtaProviderABI from "../../../ABIs/ProtocolDataProvider.json";
+import LendingPoolABI from "../../../ABIs/LendingPool.json";
 
 import dbConn from "../../../dbConnection";
 import _ from "lodash";
@@ -22,10 +23,20 @@ export const protocolDataProvider = new ethers.Contract(
   provider
 );
 
+export const lendingPool = new ethers.Contract(
+  abiAddress["LendingPool"]["kovan"],
+  LendingPoolABI,
+  provider
+);
+
 // common info for tests
 export async function getCommonInfo() {
   const userReserveOnChain = await protocolDataProvider.getUserReserveData(
     daiAddress,
+    ethers.utils.getAddress(testAddressLower)
+  );
+
+  const userAccountDataOnChain = await lendingPool.getUserAccountData(
     ethers.utils.getAddress(testAddressLower)
   );
 
@@ -47,5 +58,10 @@ export async function getCommonInfo() {
     })
     .value();
 
-  return [userReserveOnChain, userDaiReserve, daiReserveDB];
+  return {
+    userReserveOnChain,
+    userDaiReserve,
+    daiReserveDB,
+    userAccountDataOnChain,
+  };
 }
