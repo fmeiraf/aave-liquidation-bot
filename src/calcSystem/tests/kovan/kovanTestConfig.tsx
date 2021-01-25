@@ -51,6 +51,8 @@ export async function getCommonInfo() {
     reserve: { symbol: "DAI" },
   });
 
+  const allReservesDB: any = await dbConn.get("poolReserves").value();
+
   const daiReserveDB: poolReserve = await dbConn
     .get("poolReserves")
     .find({
@@ -60,8 +62,10 @@ export async function getCommonInfo() {
 
   return {
     userReserveOnChain,
+    userReservesDB,
     userDaiReserve,
     daiReserveDB,
     userAccountDataOnChain,
+    allReservesDB,
   };
 }
