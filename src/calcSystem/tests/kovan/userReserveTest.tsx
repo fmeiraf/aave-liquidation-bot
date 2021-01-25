@@ -52,7 +52,8 @@ const userReserveTest = async () => {
   }
 
   console.log(
-    `Checking A Token calculation: ${
+    `
+    Checking A Token calculation: ${
       atokenResult ? chalk.bold.green("PASS!") : chalk.bold.red("FAIL!")
     }, with ${eqAChain - aNonDecimalSize} decimals of accuracy.`
   );
@@ -84,7 +85,8 @@ const userReserveTest = async () => {
   }
 
   console.log(
-    `Checking Stable Debt calculation: ${
+    `
+    Checking Stable Debt calculation: ${
       stableDebtResult ? chalk.bold.green("PASS!") : chalk.bold.red("FAIL!")
     }, with ${eqCountStable - stableNonDecimalSize} decimals of accuracy.`
   );
@@ -119,7 +121,8 @@ const userReserveTest = async () => {
   }
 
   console.log(
-    `Checking Variable Debt calculation: ${
+    `
+    Checking Variable Debt calculation: ${
       variableDebtResult ? chalk.bold.green("PASS!") : chalk.bold.red("FAIL!")
     }, with ${eqCountVar - variableNonDecimalSize} decimals of accuracy.`
   );
