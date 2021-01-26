@@ -53,6 +53,8 @@ export async function getCommonInfo() {
 
   const allReservesDB: any = await dbConn.get("poolReserves").value();
 
+  const allUsersDB: any = await dbConn.get("users").value();
+
   const daiReserveDB: poolReserve = await dbConn
     .get("poolReserves")
     .find({
@@ -67,5 +69,6 @@ export async function getCommonInfo() {
     daiReserveDB,
     userAccountDataOnChain,
     allReservesDB,
+    allUsersDB,
   };
 }
