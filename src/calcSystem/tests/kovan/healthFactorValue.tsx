@@ -37,7 +37,6 @@ const healthFactorValue = async () => {
     18
   ).length;
   const hfComputed = computedRawUserData.healthFactor.toString();
-  console.log(hfDecimals);
 
   let charCount = 0;
   if (hfChain === "0") {
