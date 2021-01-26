@@ -1,5 +1,6 @@
 import userReserveTest from "./kovan/userReserveTest";
 import userAccountDataTest from "./kovan/userAccountTest";
+import healthFactorValue from "./kovan/healthFactorValue";
 import chalk from "chalk";
 
 import updateUsers from "../../querySystem/handlers/userUpdater";
@@ -20,6 +21,11 @@ async function run() {
     chalk.bold.cyanBright("\n Testing User Account Data calculations")
   );
   await userAccountDataTest();
+
+  console.log(
+    chalk.bold.cyanBright("\n Testing Health Factor Individual Calculation")
+  );
+  await healthFactorValue();
 }
 
 run();
