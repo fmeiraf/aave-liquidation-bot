@@ -13,7 +13,7 @@ import updateUsers from "./handlers/userUpdater";
 // types for the db schema
 
 // GOTCHA: path relative to the build folder..
-const db_path = path.resolve(__dirname, "../../../src/db/db.json");
+const db_path = path.resolve(__dirname, "../db/db.json");
 
 async function start() {
   try {
