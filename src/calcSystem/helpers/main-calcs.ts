@@ -10,21 +10,23 @@ import {
   calculateHealthFactorFromBalances,
   getCompoundedBalance,
   getCompoundedStableBalance,
-  normalize,
+  // normalize,
   // calculateAverageRate,
-  LTV_PRECISION,
+  // LTV_PRECISION,
   // calculateCompoundedInterest,
 } from "../helpers/pool-math";
 // import { rayMul } from "../helpers/ray-math";
 import {
   ComputedUserReserve,
+  ComputedUserReserveOpt,
   poolReserve,
   UserReserve,
   UserSummaryData,
+  UserSummaryDataOpt,
   // ReserveRatesData,
   // ComputedReserveData,
 } from "../../querySystem/dbTypes";
-import { ETH_DECIMALS, RAY_DECIMALS, USD_DECIMALS } from "../helpers/constants";
+import { USD_DECIMALS } from "../helpers/constants";
 
 export function getEthAndUsdBalance(
   balance: BigNumberValue,
@@ -40,6 +42,18 @@ export function getEthAndUsdBalance(
     .dividedBy(usdPriceEth)
     .toFixed(0);
   return [balanceInEth.toString(), balanceInUsd];
+}
+
+export function getEthBalance(
+  balance: BigNumberValue,
+  priceInEth: BigNumberValue,
+  decimals: number
+): string {
+  const balanceInEth = valueToZDBigNumber(balance)
+    .multipliedBy(priceInEth)
+    .dividedBy(10 ** decimals);
+
+  return balanceInEth.toString();
 }
 
 /*
@@ -135,6 +149,68 @@ export function computeUserReserveData(
       .toString(),
     totalBorrowsUSD: valueToZDBigNumber(variableBorrowsUSD)
       .plus(stableBorrowsUSD)
+      .toString(),
+  };
+}
+
+export function computeUserReserveDataOpt(
+  poolReserve: poolReserve,
+  userReserve: UserReserve,
+  currentTimestamp: number
+): ComputedUserReserveOpt {
+  const {
+    price: { priceInEth },
+    decimals,
+  } = poolReserve;
+  const underlyingBalance = getCompoundedBalance(
+    userReserve.scaledATokenBalance,
+    poolReserve.liquidityIndex,
+    poolReserve.liquidityRate,
+    poolReserve.lastUpdateTimestamp,
+    currentTimestamp
+  ).toString();
+  const underlyingBalanceETH = getEthBalance(
+    underlyingBalance,
+    priceInEth,
+    decimals
+  );
+
+  const variableBorrows = getCompoundedBalance(
+    userReserve.scaledVariableDebt,
+    poolReserve.variableBorrowIndex,
+    poolReserve.variableBorrowRate,
+    poolReserve.lastUpdateTimestamp,
+    currentTimestamp
+  ).toString();
+
+  const variableBorrowsETH = getEthBalance(
+    variableBorrows,
+    priceInEth,
+    decimals
+  );
+
+  const stableBorrows = getCompoundedStableBalance(
+    userReserve.principalStableDebt,
+    userReserve.stableBorrowRate,
+    userReserve.stableBorrowLastUpdateTimestamp,
+    currentTimestamp
+  ).toString();
+
+  const stableBorrowsETH = getEthBalance(stableBorrows, priceInEth, decimals);
+
+  return {
+    ...userReserve,
+    underlyingBalance,
+    underlyingBalanceETH,
+    variableBorrows,
+    variableBorrowsETH,
+    stableBorrows,
+    stableBorrowsETH,
+    totalBorrows: valueToZDBigNumber(variableBorrows)
+      .plus(stableBorrows)
+      .toString(),
+    totalBorrowsETH: valueToZDBigNumber(variableBorrowsETH)
+      .plus(stableBorrowsETH)
       .toString(),
   };
 }
@@ -258,95 +334,174 @@ export function computeRawUserSummaryData(
   };
 }
 
-export function formatUserSummaryData(
+export function computeRawUserSummaryDataOpt(
   poolReservesData: poolReserve[],
   rawUserReserves: UserReserve[],
   userId: string,
-  usdPriceEth: BigNumberValue,
   currentTimestamp: number
-): UserSummaryData {
-  const userData = computeRawUserSummaryData(
-    poolReservesData,
-    rawUserReserves,
-    userId,
-    usdPriceEth,
-    currentTimestamp
-  );
-  const userReservesData = userData.reservesData.map(
-    ({ reserve, ...userReserve }): ComputedUserReserve => {
-      const reserveDecimals = reserve.decimals;
-      return {
-        ...userReserve,
-        reserve: {
-          ...reserve,
-          reserveLiquidationBonus: normalize(
-            valueToBigNumber(reserve.reserveLiquidationBonus).minus(
-              10 ** LTV_PRECISION
-            ),
-            4
-          ),
-          liquidityRate: normalize(reserve.liquidityRate, RAY_DECIMALS),
-        },
-        scaledATokenBalance: normalize(
-          userReserve.scaledATokenBalance,
-          reserveDecimals
-        ),
-        stableBorrowRate: normalize(userReserve.stableBorrowRate, RAY_DECIMALS),
-        variableBorrowIndex: normalize(
-          userReserve.variableBorrowIndex,
-          RAY_DECIMALS
-        ),
-        underlyingBalance: normalize(
-          userReserve.underlyingBalance,
-          reserveDecimals
-        ),
-        underlyingBalanceETH: normalize(
-          userReserve.underlyingBalanceETH,
-          ETH_DECIMALS
-        ),
-        underlyingBalanceUSD: normalize(
-          userReserve.underlyingBalanceUSD,
-          USD_DECIMALS
-        ),
-        stableBorrows: normalize(userReserve.stableBorrows, reserveDecimals),
-        stableBorrowsETH: normalize(userReserve.stableBorrowsETH, ETH_DECIMALS),
-        stableBorrowsUSD: normalize(userReserve.stableBorrowsUSD, USD_DECIMALS),
-        variableBorrows: normalize(
-          userReserve.variableBorrows,
-          reserveDecimals
-        ),
-        variableBorrowsETH: normalize(
-          userReserve.variableBorrowsETH,
-          ETH_DECIMALS
-        ),
-        variableBorrowsUSD: normalize(
-          userReserve.variableBorrowsUSD,
-          USD_DECIMALS
-        ),
-        totalBorrows: normalize(userReserve.totalBorrows, reserveDecimals),
-        totalBorrowsETH: normalize(userReserve.totalBorrowsETH, ETH_DECIMALS),
-        totalBorrowsUSD: normalize(userReserve.totalBorrowsUSD, USD_DECIMALS),
-      };
+): UserSummaryDataOpt {
+  let totalLiquidityETH = valueToZDBigNumber("0");
+  let totalCollateralETH = valueToZDBigNumber("0");
+  let totalBorrowsETH = valueToZDBigNumber("0");
+  let currentLiquidationThreshold = valueToBigNumber("0");
+
+  rawUserReserves.map((userReserve) => {
+    const poolReserve = poolReservesData.find(
+      (reserve) => reserve.id === userReserve.reserve.id
+    );
+    if (!poolReserve) {
+      throw new Error(
+        "Reserve is not registered on platform, please contact support"
+      );
     }
+    const computedUserReserve = computeUserReserveDataOpt(
+      poolReserve,
+      userReserve,
+      currentTimestamp
+    );
+    totalLiquidityETH = totalLiquidityETH.plus(
+      computedUserReserve.underlyingBalanceETH
+    );
+    totalBorrowsETH = totalBorrowsETH
+      .plus(computedUserReserve.variableBorrowsETH)
+      .plus(computedUserReserve.stableBorrowsETH);
+
+    // asset enabled as collateral
+    if (
+      poolReserve.usageAsCollateralEnabled &&
+      userReserve.usageAsCollateralEnabledOnUser
+    ) {
+      totalCollateralETH = totalCollateralETH.plus(
+        computedUserReserve.underlyingBalanceETH
+      );
+      currentLiquidationThreshold = currentLiquidationThreshold.plus(
+        valueToBigNumber(computedUserReserve.underlyingBalanceETH).multipliedBy(
+          poolReserve.reserveLiquidationThreshold
+        )
+      );
+    }
+    return computedUserReserve;
+  });
+  // .sort((a, b) =>
+  //   a.reserve.symbol > b.reserve.symbol
+  //     ? 1
+  //     : a.reserve.symbol < b.reserve.symbol
+  //     ? -1
+  //     : 0
+  // );
+
+  if (currentLiquidationThreshold.gt(0)) {
+    currentLiquidationThreshold = currentLiquidationThreshold
+      .div(totalCollateralETH)
+      .decimalPlaces(0, BigNumber.ROUND_DOWN);
+  }
+
+  const healthFactor = calculateHealthFactorFromBalances(
+    totalCollateralETH,
+    totalBorrowsETH,
+    currentLiquidationThreshold
   );
+
   return {
-    id: userData.id,
-    reservesData: userReservesData,
-    totalLiquidityETH: normalize(userData.totalLiquidityETH, ETH_DECIMALS),
-    totalLiquidityUSD: normalize(userData.totalLiquidityUSD, USD_DECIMALS),
-    totalCollateralETH: normalize(userData.totalCollateralETH, ETH_DECIMALS),
-    totalCollateralUSD: normalize(userData.totalCollateralUSD, USD_DECIMALS),
-    totalBorrowsETH: normalize(userData.totalBorrowsETH, ETH_DECIMALS),
-    totalBorrowsUSD: normalize(userData.totalBorrowsUSD, USD_DECIMALS),
-    availableBorrowsETH: normalize(userData.availableBorrowsETH, ETH_DECIMALS),
-    currentLoanToValue: normalize(userData.currentLoanToValue, 4),
-    currentLiquidationThreshold: normalize(
-      userData.currentLiquidationThreshold,
-      4
-    ),
-    healthFactor: userData.healthFactor,
+    id: userId,
+    totalLiquidityETH: totalLiquidityETH.toString(),
+    totalCollateralETH: totalCollateralETH.toString(),
+    totalBorrowsETH: totalBorrowsETH.toString(),
+    currentLiquidationThreshold: currentLiquidationThreshold.toString(),
+    healthFactor: healthFactor.toString(),
+    // reservesData: userReservesData,
   };
 }
+
+// export function formatUserSummaryData(
+//   poolReservesData: poolReserve[],
+//   rawUserReserves: UserReserve[],
+//   userId: string,
+//   usdPriceEth: BigNumberValue,
+//   currentTimestamp: number
+// ): UserSummaryData {
+//   const userData = computeRawUserSummaryData(
+//     poolReservesData,
+//     rawUserReserves,
+//     userId,
+//     usdPriceEth,
+//     currentTimestamp
+//   );
+//   const userReservesData = userData.reservesData.map(
+//     ({ reserve, ...userReserve }): ComputedUserReserve => {
+//       const reserveDecimals = reserve.decimals;
+//       return {
+//         ...userReserve,
+//         reserve: {
+//           ...reserve,
+//           reserveLiquidationBonus: normalize(
+//             valueToBigNumber(reserve.reserveLiquidationBonus).minus(
+//               10 ** LTV_PRECISION
+//             ),
+//             4
+//           ),
+//           liquidityRate: normalize(reserve.liquidityRate, RAY_DECIMALS),
+//         },
+//         scaledATokenBalance: normalize(
+//           userReserve.scaledATokenBalance,
+//           reserveDecimals
+//         ),
+//         stableBorrowRate: normalize(userReserve.stableBorrowRate, RAY_DECIMALS),
+//         variableBorrowIndex: normalize(
+//           userReserve.variableBorrowIndex,
+//           RAY_DECIMALS
+//         ),
+//         underlyingBalance: normalize(
+//           userReserve.underlyingBalance,
+//           reserveDecimals
+//         ),
+//         underlyingBalanceETH: normalize(
+//           userReserve.underlyingBalanceETH,
+//           ETH_DECIMALS
+//         ),
+//         underlyingBalanceUSD: normalize(
+//           userReserve.underlyingBalanceUSD,
+//           USD_DECIMALS
+//         ),
+//         stableBorrows: normalize(userReserve.stableBorrows, reserveDecimals),
+//         stableBorrowsETH: normalize(userReserve.stableBorrowsETH, ETH_DECIMALS),
+//         stableBorrowsUSD: normalize(userReserve.stableBorrowsUSD, USD_DECIMALS),
+//         variableBorrows: normalize(
+//           userReserve.variableBorrows,
+//           reserveDecimals
+//         ),
+//         variableBorrowsETH: normalize(
+//           userReserve.variableBorrowsETH,
+//           ETH_DECIMALS
+//         ),
+//         variableBorrowsUSD: normalize(
+//           userReserve.variableBorrowsUSD,
+//           USD_DECIMALS
+//         ),
+//         totalBorrows: normalize(userReserve.totalBorrows, reserveDecimals),
+//         totalBorrowsETH: normalize(userReserve.totalBorrowsETH, ETH_DECIMALS),
+//         totalBorrowsUSD: normalize(userReserve.totalBorrowsUSD, USD_DECIMALS),
+//       };
+//     }
+//   );
+//   return {
+//     id: userData.id,
+//     reservesData: userReservesData,
+//     totalLiquidityETH: normalize(userData.totalLiquidityETH, ETH_DECIMALS),
+//     totalLiquidityUSD: normalize(userData.totalLiquidityUSD, USD_DECIMALS),
+//     totalCollateralETH: normalize(userData.totalCollateralETH, ETH_DECIMALS),
+//     totalCollateralUSD: normalize(userData.totalCollateralUSD, USD_DECIMALS),
+//     totalBorrowsETH: normalize(userData.totalBorrowsETH, ETH_DECIMALS),
+//     totalBorrowsUSD: normalize(userData.totalBorrowsUSD, USD_DECIMALS),
+//     availableBorrowsETH: normalize(userData.availableBorrowsETH, ETH_DECIMALS),
+//     currentLoanToValue: normalize(userData.currentLoanToValue, 4),
+//     currentLiquidationThreshold: normalize(
+//       userData.currentLiquidationThreshold,
+//       4
+//     ),
+//     healthFactor: userData.healthFactor,
+//   };
+// }
 
 // export function formatReserves(
 //   reserves: poolReserve[],

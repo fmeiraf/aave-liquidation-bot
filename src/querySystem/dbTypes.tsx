@@ -130,6 +130,20 @@ export type ComputedUserReserve = UserReserve & {
   totalBorrowsUSD: string;
 };
 
+export type ComputedUserReserveOpt = UserReserve & {
+  underlyingBalance: string;
+  underlyingBalanceETH: string;
+
+  variableBorrows: string;
+  variableBorrowsETH: string;
+
+  stableBorrows: string;
+  stableBorrowsETH: string;
+
+  totalBorrows: string;
+  totalBorrowsETH: string;
+};
+
 export type UserSummaryData = {
   id: string;
   totalLiquidityETH: string;
@@ -143,4 +157,13 @@ export type UserSummaryData = {
   currentLiquidationThreshold: string;
   healthFactor: string;
   reservesData: ComputedUserReserve[];
+};
+
+export type UserSummaryDataOpt = {
+  id: string;
+  totalLiquidityETH: string;
+  totalCollateralETH: string;
+  totalBorrowsETH: string;
+  currentLiquidationThreshold: string;
+  healthFactor: string;
 };
