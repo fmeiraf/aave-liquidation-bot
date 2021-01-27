@@ -3,7 +3,7 @@ import low from "lowdb";
 import FileSync from "lowdb/adapters/FileSync";
 import chalk from "chalk";
 import path from "path";
-import { promises as fsPromises } from "fs";
+// import { promises as fsPromises } from "fs";
 import { Schema } from "./dbTypes";
 import { loadInitialUsers } from "./graphql/queries";
 import updateLastEventsTimestamps from "./handlers/updateLastEventTimestamps";
@@ -21,7 +21,8 @@ async function start() {
 
     //check if db.json exists, if not, create db and initial run config
     if (!fs.existsSync(db_path)) {
-      await fsPromises.writeFile(db_path, "");
+      // await fs.mkdirSync("../db");
+      await fs.outputFile(db_path, "");
       console.log(chalk.yellow("Created new DB file "));
 
       //create default format for db
