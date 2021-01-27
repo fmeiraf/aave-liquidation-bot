@@ -116,6 +116,6 @@ dist
 .pnp.*
 
 # build folder
-build/
+src/build/
 
 db/
