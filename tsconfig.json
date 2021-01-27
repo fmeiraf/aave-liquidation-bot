@@ -7,7 +7,7 @@
     "importHelpers": true,
     "declaration": true,
     "sourceMap": true,
-    "rootDir": "./",
+    "rootDir": "./src",
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -28,6 +28,6 @@
     },
     "jsx": "react",
     "esModuleInterop": true,
-    "outDir": "./build"
+    "outDir": "./src/build"
   }
 }

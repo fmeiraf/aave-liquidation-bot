@@ -7,7 +7,7 @@ import _ from "lodash";
 import { getUsersToUpdate, getUserData } from "../graphql/queries";
 import updateLastEventsTimestamps from "./updateLastEventTimestamps";
 
-const db_path = path.resolve(__dirname, "../../../../src/db/db.json");
+const db_path = path.resolve(__dirname, "../../db/db.json");
 
 const updateUsers = async () => {
   console.log(chalk.cyan("Starting user update check."));
