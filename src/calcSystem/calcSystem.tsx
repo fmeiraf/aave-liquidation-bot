@@ -32,7 +32,10 @@ export async function calcAllUsersData() {
       currentTimeStamp
     );
 
-    return computedRawUserData;
+    return {
+      ...computedRawUserData,
+      healthFactorNum: parseFloat(computedRawUserData.healthFactor.toString()),
+    };
   });
 
   const t1 = performance.now();

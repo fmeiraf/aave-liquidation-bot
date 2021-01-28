@@ -50,7 +50,7 @@ export type Schema = {
   users: User[];
   lastEventTimestamps: lastEventTimestamp[];
   poolReserves: poolReserve[];
-  userVitals: UserSummaryDataOpt[];
+  userVitals: UserVitals[];
 };
 
 export type poolReserve = {
@@ -167,4 +167,14 @@ export type UserSummaryDataOpt = {
   totalBorrowsETH: string;
   currentLiquidationThreshold: string;
   healthFactor: string;
+};
+
+export type UserVitals = {
+  id: string;
+  totalLiquidityETH: string;
+  totalCollateralETH: string;
+  totalBorrowsETH: string;
+  currentLiquidationThreshold: string;
+  healthFactor: string;
+  healthFactorNum: number;
 };
