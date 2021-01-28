@@ -9,17 +9,19 @@ import { loadInitialUsers } from "./graphql/queries";
 import updateLastEventsTimestamps from "./handlers/updateLastEventTimestamps";
 import updatePoolReserves from "./handlers/updatePoolReserves";
 import updateUsers from "./handlers/userUpdater";
+import { calcAllUsersData } from "../calcSystem/calcSystem";
 
 // types for the db schema
 
 // GOTCHA: path relative to the build folder..
 const db_path = path.resolve(__dirname, "../db/db.json");
+console.log(db_path);
 
 async function start() {
   try {
     console.log(chalk.bold.greenBright("### Starting Query System .. ###"));
 
-    //check if db.json exists, if not, create db and initial run config
+    // check if db.json exists, if not, create db and initial run config
     if (!fs.existsSync(db_path)) {
       // await fs.mkdirSync("../db");
       await fs.outputFile(db_path, "");
@@ -33,6 +35,7 @@ async function start() {
         users: [],
         lastEventTimestamps: [],
         poolReserves: [],
+        userVitals: [],
       }).write();
 
       // insert into db timestamp of the last update
@@ -50,8 +53,10 @@ async function start() {
     }
 
     console.log(chalk.bold.greenBright("### Starting Watch Mode .. ###"));
+
     // debug only
     await updateUsers();
+    calcAllUsersData();
 
     // start querying for events of interest using the last index from
     // previous step
