@@ -50,6 +50,7 @@ export type Schema = {
   users: User[];
   lastEventTimestamps: lastEventTimestamp[];
   poolReserves: poolReserve[];
+  userVitals: UserSummaryDataOpt[];
 };
 
 export type poolReserve = {
