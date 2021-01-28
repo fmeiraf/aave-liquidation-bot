@@ -4,7 +4,7 @@ import abiAddress from "../../../ABIs/abiAddress";
 import ProtocolDAtaProviderABI from "../../../ABIs/ProtocolDataProvider.json";
 import LendingPoolABI from "../../../ABIs/LendingPool.json";
 
-import dbConn from "../../../dbConnection";
+import { dbConn } from "../../../dbConnection";
 import _ from "lodash";
 import { poolReserve } from "../../../querySystem/dbTypes";
 
