@@ -1,85 +1,48 @@
-// import BigNumber from "bignumber.js";
-// import { UserReserve } from "../querySystem/dbTypes";
+import { User, UserSummaryDataOpt, poolReserve } from "../querySystem/dbTypes";
+import { computeRawUserSummaryDataOpt } from "./helpers/main-calcs";
 
-// import {
-//   BigNumberValue,
-//   valueToBigNumber,
-//   valueToZDBigNumber,
-// } from "./helpers/bignumber";
-// import * as RayMath from "./helpers/ray-math";
+import _ from "lodash";
+import path from "path";
+import chalk from "chalk";
+import { performance } from "perf_hooks";
+import low from "lowdb";
+import FileSync from "lowdb/adapters/FileSync";
+import { Schema } from "../querySystem/dbTypes";
 
-// const SECONDS_PER_YEAR = valueToBigNumber("31536000");
-// // const ETH_DECIMALS = 18;
-// // const USD_DECIMALS = 10;
-// // const RAY_DECIMALS = 27;
+const db_path = path.resolve(__dirname, "../db/db.json");
 
-// const calculateCompoundedInterest = (
-//   rate: BigNumberValue,
-//   currentTimestamp: number,
-//   lastUpdateTimestamp: number
-// ): BigNumber => {
-//   const timeDelta = valueToZDBigNumber(currentTimestamp - lastUpdateTimestamp);
-//   const ratePerSecond = valueToZDBigNumber(rate).dividedBy(SECONDS_PER_YEAR);
-//   return RayMath.rayPow(ratePerSecond.plus(RayMath.RAY), timeDelta);
-// };
+export async function calcAllUsersData() {
+  //   const dbConn = dbConnect(db_path);
+  const adapter = new FileSync<Schema>(db_path);
+  const dbConn = await low(adapter);
+  const users: User[] = await dbConn.get("users").value();
+  const reserves: poolReserve[] = await dbConn.get("poolReserves").value();
 
-// export const calculateLinearInterest = (
-//   rate: BigNumberValue,
-//   currentTimestamp: number,
-//   lastUpdateTimestamp: number
-// ) => {
-//   const timeDelta = RayMath.wadToRay(
-//     valueToZDBigNumber(currentTimestamp - lastUpdateTimestamp)
-//   );
-//   const timeDeltaInSeconds = RayMath.rayDiv(
-//     timeDelta,
-//     RayMath.wadToRay(SECONDS_PER_YEAR)
-//   );
-//   return RayMath.rayMul(rate, timeDeltaInSeconds).plus(RayMath.RAY);
-// };
+  const t0 = performance.now();
+  let userCount = 0;
+  const userData = users.map((user: User) => {
+    userCount++;
 
-// export function getCompoundedBorrowBalance(
-//   // reserve: ReserveData,
-//   userReserve: UserReserve,
-//   currentTimestamp: number
-// ): BigNumber {
-//   const stableDebt = valueToZDBigNumber(userReserve.principalStableDebt);
-//   // const variableDebt = valueToZDBigNumber(userReserve.currentVariableDebt);
+    const currentTimeStamp = Math.round(Date.now() / 1000);
 
-//   // const principalBorrows = stableDebt.plus(variableDebt);
-//   // if (principalBorrows.eq('0')) {
-//   //   return valueToZDBigNumber('0');
-//   // }
-//   // let cumulatedInterest;
-//   // if (!variableDebt.eq(0)) {
-//   //   let compoundedInterest = calculateCompoundedInterest(
-//   //     reserve.variableBorrowRate,
-//   //     currentTimestamp,
-//   //     reserve.lastUpdateTimestamp
-//   //   );
+    const computedRawUserData: UserSummaryDataOpt = computeRawUserSummaryDataOpt(
+      reserves,
+      user.reserves,
+      user.id,
+      currentTimeStamp
+    );
 
-//   //   cumulatedInterest = RayMath.rayDiv(
-//   //     RayMath.rayMul(compoundedInterest, reserve.variableBorrowIndex),
-//   //     userReserve.variableBorrowIndex
-//   //   );
-//   // } else {
-//   //   // if stable
-//   //   cumulatedInterest = calculateCompoundedInterest(
-//   //     userReserve.stableBorrowRate,
-//   //     currentTimestamp,
-//   //     userReserve.lastUpdateTimestamp
-//   //   );
-//   // }
-//   const cumulatedInterest = calculateCompoundedInterest(
-//     userReserve.stableBorrowRate,
-//     currentTimestamp,
-//     userReserve.lastUpdateTimestamp
-//   );
+    return computedRawUserData;
+  });
 
-//   const borrowBalanceRay = RayMath.wadToRay(stableDebt);
+  const t1 = performance.now();
 
-//   console.log(
-//     RayMath.rayToWad(RayMath.rayMul(borrowBalanceRay, cumulatedInterest))
-//   );
-//   return RayMath.rayToWad(RayMath.rayMul(borrowBalanceRay, cumulatedInterest));
-// }
+  await dbConn.set("userVitals", userData).write();
+
+  console.log(
+    chalk.cyanBright(
+      `Updated users vital KPIs. Took ${(t1 - t0) /
+        1000} seconds, for ${userCount} users. `
+    )
+  );
+}
