@@ -30,9 +30,9 @@
     "chalk": "^4.1.0",
     "cross-fetch": "^3.0.6",
     "dotenv": "^8.2.0",
-    "ethers": "^5.0.24",
     "fs-extra": "^9.0.1",
     "graphql": "^15.4.0",
+    "hardhat": "^2.0.8",
     "lodash": "^4.17.20",
     "lowdb": "^1.0.0",
     "tsdx": "^0.14.1",
@@ -40,6 +40,11 @@
     "typescript": "^3.9.7"
   },
   "devDependencies": {
-    "@tsconfig/node12": "^1.0.7"
+    "@nomiclabs/hardhat-ethers": "^2.0.1",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@tsconfig/node12": "^1.0.7",
+    "chai": "^4.2.0",
+    "ethereum-waffle": "^3.2.2",
+    "ethers": "^5.0.26"
   }
 }
