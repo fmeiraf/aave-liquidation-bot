@@ -10,6 +10,7 @@ X - use aave-js package to calculate parameters and create a queue for liquidati
 
 - create solidity code for the flash loan call
 - use hardhat to create a test for executing the transaction on a given block
+- make the query and calc scripts run on background
 - Find a way to execute the transaction on my node
 - deploy bot
 - Hope it works and don't be frontrunned and be happy
