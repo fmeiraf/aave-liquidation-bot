@@ -177,4 +177,5 @@ export type UserVitals = {
   currentLiquidationThreshold: string;
   healthFactor: string;
   healthFactorNum: number;
+  totalCollateralETHNum: number;
 };

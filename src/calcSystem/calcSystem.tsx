@@ -1,5 +1,6 @@
 import { User, UserSummaryDataOpt, poolReserve } from "../querySystem/dbTypes";
 import { computeRawUserSummaryDataOpt } from "./helpers/main-calcs";
+import { normalize } from "./helpers/pool-math";
 
 import _ from "lodash";
 import path from "path";
@@ -35,6 +36,9 @@ export async function calcAllUsersData() {
     return {
       ...computedRawUserData,
       healthFactorNum: parseFloat(computedRawUserData.healthFactor.toString()),
+      totalCollateralETHNum: parseFloat(
+        normalize(computedRawUserData.totalCollateralETH, 18)
+      ),
     };
   });
 
