@@ -1,11 +1,19 @@
 import { dbConn } from "../dbConnection";
 import _ from "lodash";
 
-const data = dbConn.get("userVitals").value();
+async function findTrades() {
+  const data = dbConn.get("userVitals").value();
 
-const result = _.filter(data, (arrayEl) => {
-  return arrayEl.healthFactorNum <= 1.5 && arrayEl.totalBorrowsETH !== "0";
-});
+  const result = _.orderBy(
+    _.filter(data, (arrayEl) => {
+      return arrayEl.healthFactorNum < 1 && arrayEl.totalBorrowsETH !== "0";
+    }),
+    ["totalCollateralETHNum"],
+    ["desc"]
+  );
 
-console.log(result);
-// console.log(data);
+  console.log(result);
+  // console.log(data);
+}
+
+findTrades();
