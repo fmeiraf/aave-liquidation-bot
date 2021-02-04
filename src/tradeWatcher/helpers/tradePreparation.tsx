@@ -6,8 +6,7 @@ import LendingPoolABI from "../../ABIs/LendingPool.json";
 import ProtocolDAtaProviderABI from "../../ABIs/ProtocolDataProvider.json";
 import PriceOracleABI from "../../ABIs/PriceOracle.json";
 import { normalize } from "../../calcSystem/helpers/pool-math";
-// import BigNumber from "bignumber.js";
-import { valueToZDBigNumber } from "../../calcSystem/helpers/bignumber";
+import BigNumber from "bignumber.js";
 import { NETWORK } from "../../env";
 
 import _ from "lodash";
@@ -70,15 +69,6 @@ async function prepareTrades(candidatesArray: UserVitals[]) {
           .find({ id: candidateData.id })
           .value();
 
-        // let opportunityObj = {
-        //   user: "",
-        //   type: "Success",
-        //   liquidationOpportunityEth: 0,
-        //   totalDebtEth: 0,
-        //   asset: "",
-        //   obs: "",
-        // };
-
         if (userDataDB !== undefined) {
           const userCollaterals = _.filter(userDataDB["reserves"], {
             usageAsCollateralEnabledOnUser: true,
@@ -94,21 +84,21 @@ async function prepareTrades(candidatesArray: UserVitals[]) {
                 ethers.utils.getAddress(candidateData["id"])
               );
 
-              const collateralBalance = await valueToZDBigNumber(
-                userReserveData["currentATokenBalance"].toString()
-              );
+              const collateralBalance = await userReserveData[
+                "currentATokenBalance"
+              ];
               const collateralEthPrice = await priceOracle.getAssetPrice(
                 ethers.utils.getAddress(
                   userCollateral["reserve"]["underlyingAsset"]
                 )
               );
 
-              // const normalizer = new BigNumber("10").pow(18).toString();
+              const assetDecimals = userCollateral["reserve"]["decimals"];
 
               const totalCollateralInEth = await normalize(
                 collateralBalance
-                  .multipliedBy(collateralEthPrice)
-                  .div(10 ** 18)
+                  .mul(collateralEthPrice)
+                  .div(new BigNumber("10").pow(assetDecimals).toString())
                   .toString(),
                 18
               );
@@ -122,31 +112,39 @@ async function prepareTrades(candidatesArray: UserVitals[]) {
               const maxLiquidationAmountEth =
                 parseFloat(totalCollateralInEth) * liquidationBonus;
 
-              console.log(collateralBalance);
-              console.log(collateralEthPrice);
-              console.log(totalCollateralInEth);
-              console.log(liquidationBonus);
-              console.log(maxLiquidationAmountEth);
-
               //getting debt variables to keep in the final obj
 
               const totalDebtinEth = parseFloat(
-                normalize(userDataOnChain["totalDebtETH"], 18)
+                normalize(userDataOnChain["totalDebtETH"].toString(), 18)
               );
+
               // filling the final obj
               return {
                 user: ethers.utils.getAddress(candidateData["id"]),
                 type: "Success",
                 liquidationOpportunityEth: maxLiquidationAmountEth,
                 totalDebtEth: totalDebtinEth,
-                asset: ethers.utils.getAddress(
+                assetCode: userCollateral["reserve"]["symbol"],
+                atokenBalance: normalize(
+                  userCollateral["scaledATokenBalance"].toString(),
+                  18
+                ),
+                assetAddress: ethers.utils.getAddress(
                   userCollateral["reserve"]["underlyingAsset"]
                 ),
                 obs: "",
               };
             })
           );
-          return assetPotentials;
+
+          // chossing the winner asset in eth potential price
+          const orderedPotentials = _.orderBy(
+            assetPotentials,
+            ["liquidationOpportunityEth"],
+            ["desc"]
+          );
+
+          return orderedPotentials[0];
         } else {
           return {
             user: candidateData["id"],
