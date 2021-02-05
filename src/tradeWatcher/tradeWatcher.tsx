@@ -16,6 +16,7 @@ async function findTrades() {
 
   // check potential candidates and prepare their call data
   const potentialTrades = await prepareTrades(usersUnderHF);
+
   // run each candidate estimating gas costs and comparing potential profit
 
   // console.log(usersUnderHF);
