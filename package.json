@@ -20,6 +20,7 @@
   "homepage": "https://github.com/FernandoMeiraFilho/aave-liquidation#readme",
   "dependencies": {
     "@apollo/client": "^3.3.6",
+    "@openzeppelin/contracts": "^3.4.0",
     "@types/dotenv": "^8.2.0",
     "@types/fs-extra": "^9.0.6",
     "@types/jest": "^26.0.20",
