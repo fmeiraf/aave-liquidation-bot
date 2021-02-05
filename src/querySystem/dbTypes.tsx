@@ -51,6 +51,13 @@ export type Schema = {
   lastEventTimestamps: lastEventTimestamp[];
   poolReserves: poolReserve[];
   userVitals: UserVitals[];
+  blockInfo: blockData;
+};
+
+export type blockData = {
+  block: {
+    number: number;
+  };
 };
 
 export type poolReserve = {

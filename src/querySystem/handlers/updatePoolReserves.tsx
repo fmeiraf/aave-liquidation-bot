@@ -4,7 +4,7 @@ import chalk from "chalk";
 import path from "path";
 import { Schema } from "../dbTypes";
 import _ from "lodash";
-import { getReservesData } from "../graphql/queries";
+import { getReservesData, getBlockNumber } from "../graphql/queries";
 
 const db_path = path.resolve(__dirname, "../../db/db.json");
 
@@ -15,7 +15,10 @@ const updatePoolReserves: any = async () => {
   const reservesData = await getReservesData();
   db.set("poolReserves", reservesData).write();
 
-  console.log(chalk.magenta("Updated pool reserves!"));
+  const blockData = await getBlockNumber();
+  db.set("blockInfo", blockData).write();
+
+  console.log(chalk.magenta("Updated pool reserves (and blockNumber!"));
 };
 
 export default updatePoolReserves;

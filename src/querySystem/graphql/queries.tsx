@@ -220,3 +220,19 @@ export const getReservesData: any = async function() {
 
   return result.data.reserves;
 };
+
+export const getBlockNumber: any = async function() {
+  const result: any = await client.query({
+    query: gql`
+      query getBlockNumber {
+        _meta {
+          block {
+            number
+          }
+        }
+      }
+    `,
+  });
+
+  return result.data._meta;
+};
