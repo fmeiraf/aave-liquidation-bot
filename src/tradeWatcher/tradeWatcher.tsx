@@ -2,6 +2,7 @@ import { dbConn } from "../dbConnection";
 import _ from "lodash";
 
 import prepareTrades from "./helpers/tradePreparation";
+// import { normalize } from "../calcSystem/helpers/pool-math";
 
 async function findTrades() {
   const data = dbConn.get("userVitals").value();
@@ -19,10 +20,8 @@ async function findTrades() {
 
   // run each candidate estimating gas costs and comparing potential profit
 
-  // console.log(usersUnderHF);
+  console.log(usersUnderHF);
   console.log(potentialTrades);
-
-  // console.log(data);
 }
 
 findTrades();
