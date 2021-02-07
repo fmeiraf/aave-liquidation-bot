@@ -7,7 +7,7 @@ import ProtocolDAtaProviderABI from "../../ABIs/ProtocolDataProvider.json";
 import PriceOracleABI from "../../ABIs/PriceOracle.json";
 import { normalize } from "../../calcSystem/helpers/pool-math";
 // import BigNumber from "bignumber.js";
-import { getBestDebtAsset } from "./optimizationCalcs";
+import { getBestDebtAsset, gestBestCollateral } from "./optimizationCalcs";
 import { NETWORK } from "../../env";
 
 import _ from "lodash";
@@ -83,90 +83,25 @@ async function prepareTrades(candidatesArray: UserVitals[]) {
           .value();
 
         if (userDataDB !== undefined) {
-          const bestDebtAsset = getBestDebtAsset(
+          const bestDebtAsset = await getBestDebtAsset(
             candidateData.id,
             userDataDB,
             protocolDataProvider,
             priceOracle
           );
 
-          return bestDebtAsset;
+          const bestCollateralAsset = await gestBestCollateral(
+            candidateData.id,
+            userDataDB,
+            protocolDataProvider,
+            priceOracle,
+            bestDebtAsset["currentTotalDebtEthRaw"]
+          );
 
-          // const userCollaterals = _.filter(userDataDB["reserves"], {
-          //   usageAsCollateralEnabledOnUser: true,
-          // });
-          // const assetPotentials = await Promise.all(
-          //   _.map(userCollaterals, async (userCollateral) => {
-          //     // get On Chain data to be more accurate
-
-          //     const userReserveData = await protocolDataProvider.getUserReserveData(
-          //       ethers.utils.getAddress(
-          //         userCollateral["reserve"]["underlyingAsset"]
-          //       ),
-          //       ethers.utils.getAddress(candidateData["id"])
-          //     );
-
-          //     const collateralBalance = await userReserveData[
-          //       "currentATokenBalance"
-          //     ];
-          //     const collateralEthPrice = await priceOracle.getAssetPrice(
-          //       ethers.utils.getAddress(
-          //         userCollateral["reserve"]["underlyingAsset"]
-          //       )
-          //     );
-
-          //     const assetDecimals = userCollateral["reserve"]["decimals"];
-
-          //     const totalCollateralInEth = await normalize(
-          //       collateralBalance
-          //         .mul(collateralEthPrice)
-          //         .div(new BigNumber("10").pow(assetDecimals).toString())
-          //         .toString(),
-          //       18
-          //     );
-
-          //     const liquidationBonus =
-          //       parseFloat(
-          //         userCollateral["reserve"]["reserveLiquidationBonus"]
-          //       ) /
-          //       10 ** 5;
-
-          //     const maxLiquidationAmountEth =
-          //       parseFloat(totalCollateralInEth) * liquidationBonus;
-
-          //     //getting debt variables to keep in the final obj
-
-          //     const totalDebtinEth = parseFloat(
-          //       normalize(userDataOnChain["totalDebtETH"].toString(), 18)
-          //     );
-
-          //     // filling the final obj
-          //     return {
-          //       user: ethers.utils.getAddress(candidateData["id"]),
-          //       type: "Success",
-          //       liquidationOpportunityEth: maxLiquidationAmountEth,
-          //       totalDebtEth: totalDebtinEth,
-          //       assetCode: userCollateral["reserve"]["symbol"],
-          //       atokenBalance: normalize(
-          //         userCollateral["scaledATokenBalance"].toString(),
-          //         18
-          //       ),
-          //       assetAddress: ethers.utils.getAddress(
-          //         userCollateral["reserve"]["underlyingAsset"]
-          //       ),
-          //       obs: "",
-          //     };
-          //   })
-          // );
-
-          // // chossing the winner asset in eth potential price
-          // const orderedPotentials = _.orderBy(
-          //   assetPotentials,
-          //   ["liquidationOpportunityEth"],
-          //   ["desc"]
-          // );
-
-          // return orderedPotentials[0];
+          return {
+            ...bestDebtAsset,
+            ...bestCollateralAsset,
+          };
         } else {
           return {
             user: candidateData["id"],

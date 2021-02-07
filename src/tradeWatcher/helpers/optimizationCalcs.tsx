@@ -4,7 +4,10 @@ import BigNumber from "bignumber.js";
 
 import { normalize } from "../../calcSystem/helpers/pool-math";
 import { User, UserReserve } from "../../querySystem/dbTypes";
-import { valueToBigNumber } from "../../calcSystem/helpers/bignumber";
+import {
+  valueToBigNumber,
+  // BigNumberValue,
+} from "../../calcSystem/helpers/bignumber";
 
 export async function getBestDebtAsset(
   userAddress: string,
@@ -59,24 +62,31 @@ export async function getBestDebtAsset(
             new BigNumber("10")
               .pow(userReserve["reserve"]["decimals"])
               .toString()
-          )
-          .toString();
+          );
+
+        const liquidationBonus =
+          parseFloat(userReserve["reserve"]["reserveLiquidationBonus"]) /
+          10 ** 5;
 
         return {
           user: ethers.utils.getAddress(userAddress),
-          asset: userReserve["reserve"]["symbol"],
-          assetAddress: ethers.utils.getAddress(
+          debtAsset: userReserve["reserve"]["symbol"],
+          debtAssetAddress: ethers.utils.getAddress(
             userReserve["reserve"]["underlyingAsset"]
           ),
           currentTotalDebtEth: parseFloat(currentTotalDebtInEth),
           currentTotalDebtEthRaw: currentTotalDebtInEthRaw,
+          maxRawardInEth:
+            parseFloat(currentTotalDebtInEth) * 0.5 * liquidationBonus,
         };
       } else {
         return {
           user: ethers.utils.getAddress(userAddress),
-          asset: userReserve["reserve"]["symbol"],
-          assetAddress: userReserve["reserve"]["underlyingAsset"],
+          debtAsset: userReserve["reserve"]["symbol"],
+          debtAssetAddress: userReserve["reserve"]["underlyingAsset"],
           currentTotalDebtEth: 0,
+          currentTotalDebtEthRaw: 0,
+          maxRawardInEth: 0,
         };
       }
     })
@@ -89,4 +99,90 @@ export async function getBestDebtAsset(
   )[0];
 
   return winnerDebtAsset;
+}
+
+export async function gestBestCollateral(
+  userAddress: string,
+  userDataDB: User,
+  protocolDataProviderContract: Contract,
+  priceOracleContract: Contract,
+  debtInEthRaw: any
+) {
+  const userCollaterals = _.filter(userDataDB["reserves"], {
+    usageAsCollateralEnabledOnUser: true,
+  });
+
+  const userCollateralAssetsInEth = await Promise.all(
+    _.map(userCollaterals, async (userCollateral: UserReserve) => {
+      const userReserveOnChain = await protocolDataProviderContract.getUserReserveData(
+        ethers.utils.getAddress(userCollateral["reserve"]["underlyingAsset"]),
+        ethers.utils.getAddress(userAddress)
+      );
+
+      const collateralBalance = userReserveOnChain["currentATokenBalance"];
+
+      const collateralEthPrice = await priceOracleContract.getAssetPrice(
+        ethers.utils.getAddress(userCollateral["reserve"]["underlyingAsset"])
+      );
+
+      const potentialCollateralGain = debtInEthRaw
+        .times(
+          new BigNumber("10")
+            .pow(17)
+            .times(5)
+            .toString()
+        )
+        .times(
+          new BigNumber("10")
+            .pow(userCollateral["reserve"]["decimals"])
+            .toString()
+        )
+        .div(
+          collateralEthPrice
+            .mul(new BigNumber("10").pow(18).toString())
+            .toString()
+        );
+
+      const liquidationBonus =
+        parseFloat(userCollateral["reserve"]["reserveLiquidationBonus"]) /
+        10 ** 5;
+
+      const collateralGain =
+        parseFloat(
+          normalize(
+            potentialCollateralGain.toString(),
+            userCollateral["reserve"]["decimals"]
+          )
+        ) * liquidationBonus;
+
+      const collateralNeeded = parseFloat(
+        normalize(
+          potentialCollateralGain.toString(),
+          userCollateral["reserve"]["decimals"]
+        )
+      );
+      const collateralBalanceNormalized = parseFloat(
+        normalize(
+          collateralBalance.toString(),
+          userCollateral["reserve"]["decimals"]
+        )
+      );
+
+      return {
+        collateralAsset: userCollateral["reserve"]["symbol"],
+        collateralAssetAddress: userCollateral["reserve"]["underlyingAsset"],
+        collateralPotentialGain: collateralGain,
+        collateralNeedCoverage: collateralNeeded / collateralBalanceNormalized,
+      };
+    })
+  );
+
+  console.log(userCollateralAssetsInEth);
+  const winnerCollateralAsset = _.orderBy(
+    userCollateralAssetsInEth,
+    ["collateralNeedCoverage"],
+    ["desc"]
+  )[0];
+
+  return winnerCollateralAsset;
 }
