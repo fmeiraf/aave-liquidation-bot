@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.6.12;
+pragma solidity >=0.6.0 <0.7.0;
+pragma experimental ABIEncoderV2;
 
 library DataTypes {
   // refer to the whitepaper, section 1.1 basic concepts for a formal description of these properties.
@@ -45,4 +46,5 @@ library DataTypes {
     uint256 data;
   }
 
-  enum InterestRateMode {NONE, STABLE, VARIABLE}
+  enum InterestRateMode { NONE, STABLE, VARIABLE }
+}

@@ -1,4 +1,6 @@
-pragma solidity >=0.6.2;
+//SPDX-License-Identifier: UNLICENSED
+pragma solidity >=0.6.0 <0.7.0;
+pragma experimental ABIEncoderV2;
 
 import "./IUniswapV2Router01.sol";
 

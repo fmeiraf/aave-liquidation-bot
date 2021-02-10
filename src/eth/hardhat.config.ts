@@ -1,5 +1,6 @@
 import { task } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
+// import { INFURA_KOVAN } from "../env";
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -19,5 +20,12 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 export default {
-  solidity: "0.6.0",
+  solidity: "0.6.12",
+  networks: {
+    hardhat: {
+      forking: {
+        url: "https://kovan.infura.io/v3/478245303595403cbe68cac2bf93d93b",
+      },
+    },
+  },
 };

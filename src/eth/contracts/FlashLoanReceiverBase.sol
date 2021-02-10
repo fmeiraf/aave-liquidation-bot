@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.6.12;
+pragma solidity >=0.6.12 <0.7.0;
+pragma experimental ABIEncoderV2;
 
-import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
-import {IERC20} from '@openzeppelin/contracts/token/ERC20/ERC20.sol';
-import {SafeERC20} from '@openzeppelin/contracts/token/ERC20/SafeERC20.sol';
-import {IFlashLoanReceiver} from '../interfaces/IFlashLoanReceiver.sol';
-import {ILendingPoolAddressesProvider} from '../interfaces/ILendingPoolAddressesProvider.sol';
-import {ILendingPool} from '../interfaces/ILendingPool.sol';
+import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import { IFlashLoanReceiver } from "../interfaces/IFlashLoanReceiver.sol";
+import {
+  ILendingPoolAddressesProvider
+} from "../interfaces/ILendingPoolAddressesProvider.sol";
+import { ILendingPool } from "../interfaces/ILendingPool.sol";
 
 abstract contract FlashLoanReceiverBase is IFlashLoanReceiver {
   using SafeERC20 for IERC20;
