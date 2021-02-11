@@ -118,4 +118,10 @@ dist
 # build folder
 src/build/
 
+# db file
 db/
+
+#hardhat cache folders
+src/eth/artifacts
+src/eth/cache
+
