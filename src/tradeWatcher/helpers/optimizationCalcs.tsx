@@ -126,12 +126,7 @@ export async function gestBestCollateral(
       );
 
       const potentialCollateralGain = debtInEthRaw
-        .times(
-          new BigNumber("10")
-            .pow(17)
-            .times(5)
-            .toString()
-        )
+        .times(new BigNumber("10").pow(17).times(5).toString())
         .times(
           new BigNumber("10")
             .pow(userCollateral["reserve"]["decimals"])
@@ -177,7 +172,6 @@ export async function gestBestCollateral(
     })
   );
 
-  console.log(userCollateralAssetsInEth);
   const winnerCollateralAsset = _.orderBy(
     userCollateralAssetsInEth,
     ["collateralNeedCoverage"],

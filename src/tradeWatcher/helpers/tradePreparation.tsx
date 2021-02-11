@@ -1,6 +1,6 @@
 import { UserVitals } from "../../querySystem/dbTypes";
 import { ethers } from "ethers";
-import { INFURA_KOVAN } from "../../env";
+import { INFURA_KOVAN, INFURA_MAINNET } from "../../env";
 import abiAddress from "../../ABIs/abiAddress";
 import LendingPoolABI from "../../ABIs/LendingPool.json";
 import ProtocolDAtaProviderABI from "../../ABIs/ProtocolDataProvider.json";
@@ -34,7 +34,9 @@ async function prepareTrades(candidatesArray: UserVitals[]) {
   const adapter = new FileSync<Schema>(db_path);
   const dbConn = await low(adapter);
 
-  const provider = new ethers.providers.JsonRpcProvider(INFURA_KOVAN);
+  const infuraKey = NETWORK === "kovan" ? INFURA_KOVAN : INFURA_MAINNET;
+
+  const provider = new ethers.providers.JsonRpcProvider(infuraKey);
   const lendingPool = new ethers.Contract(
     NETWORK === "kovan"
       ? abiAddress["LendingPool"]["kovan"]
@@ -60,58 +62,64 @@ async function prepareTrades(candidatesArray: UserVitals[]) {
   const scannedCandidates = await Promise.all(
     _.map(candidatesArray, async (candidateData: UserVitals) => {
       // double check healthFactor
-      const userDataOnChain = await lendingPool.getUserAccountData(
-        ethers.utils.getAddress(candidateData.id)
-      );
 
-      const hfChain = parseFloat(
-        normalize(userDataOnChain["healthFactor"].toString(), 18)
-      );
+      try {
+        const userDataOnChain = await lendingPool.getUserAccountData(
+          ethers.utils.getAddress(candidateData.id)
+        );
 
-      if (hfChain >= 1) {
-        const idFail = ethers.utils.getAddress(candidateData.id);
-        return {
-          id: idFail,
-          type: "Fail",
-          reason: "Health Factor on chain above 1",
-        };
-      } else {
-        //check each reserve from user is the most profitable
-        const userDataDB = await dbConn
-          .get("users")
-          .find({ id: candidateData.id })
-          .value();
+        const hfChain = parseFloat(
+          normalize(userDataOnChain["healthFactor"].toString(), 18)
+        );
 
-        if (userDataDB !== undefined) {
-          const bestDebtAsset = await getBestDebtAsset(
-            candidateData.id,
-            userDataDB,
-            protocolDataProvider,
-            priceOracle
-          );
-
-          const bestCollateralAsset = await gestBestCollateral(
-            candidateData.id,
-            userDataDB,
-            protocolDataProvider,
-            priceOracle,
-            bestDebtAsset["currentTotalDebtEthRaw"]
-          );
-
+        if (hfChain >= 1) {
+          const idFail = ethers.utils.getAddress(candidateData.id);
           return {
-            ...bestDebtAsset,
-            ...bestCollateralAsset,
+            id: idFail,
+            type: "Fail",
+            reason: "Health Factor on chain above 1",
           };
         } else {
-          return {
-            user: candidateData["id"],
-            type: "Fail",
-            liquidationOpportunityEth: 0,
-            totalDebtEth: 0,
-            asset: "",
-            obs: "user no found on DB",
-          };
+          //check each reserve from user is the most profitable
+          const userDataDB = await dbConn
+            .get("users")
+            .find({ id: candidateData.id })
+            .value();
+
+          if (userDataDB !== undefined) {
+            const bestDebtAsset = await getBestDebtAsset(
+              candidateData.id,
+              userDataDB,
+              protocolDataProvider,
+              priceOracle
+            );
+
+            const bestCollateralAsset = await gestBestCollateral(
+              candidateData.id,
+              userDataDB,
+              protocolDataProvider,
+              priceOracle,
+              bestDebtAsset["currentTotalDebtEthRaw"]
+            );
+
+            return {
+              ...bestDebtAsset,
+              ...bestCollateralAsset,
+            };
+          } else {
+            return {
+              user: candidateData["id"],
+              type: "Fail",
+              liquidationOpportunityEth: 0,
+              totalDebtEth: 0,
+              asset: "",
+              obs: "user no found on DB",
+            };
+          }
         }
+      } catch (error) {
+        console.log(error);
+        return "error";
       }
     })
   );
