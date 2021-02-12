@@ -4,7 +4,7 @@ import _ from "lodash";
 import prepareTrades from "./helpers/tradePreparation";
 // import { normalize } from "../calcSystem/helpers/pool-math";
 
-async function findTrades() {
+export async function findTrades() {
   const data = dbConn.get("userVitals").value();
 
   const usersUnderHF = _.orderBy(
@@ -18,10 +18,9 @@ async function findTrades() {
   // check potential candidates and prepare their call data
   const potentialTrades = await prepareTrades(usersUnderHF);
 
-  // run each candidate estimating gas costs and comparing potential profit
-  // to be done
-
   console.log(potentialTrades);
+
+  return potentialTrades;
 }
 
 findTrades();

@@ -105,6 +105,7 @@ async function prepareTrades(candidatesArray: UserVitals[]) {
             return {
               ...bestDebtAsset,
               ...bestCollateralAsset,
+              type: "sucess",
             };
           } else {
             return {
