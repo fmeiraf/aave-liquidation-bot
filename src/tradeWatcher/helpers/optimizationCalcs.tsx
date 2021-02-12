@@ -165,7 +165,9 @@ export async function gestBestCollateral(
 
       return {
         collateralAsset: userCollateral["reserve"]["symbol"],
-        collateralAssetAddress: userCollateral["reserve"]["underlyingAsset"],
+        collateralAssetAddress: ethers.utils.getAddress(
+          userCollateral["reserve"]["underlyingAsset"]
+        ),
         collateralPotentialGain: collateralGain,
         collateralNeedCoverage: collateralNeeded / collateralBalanceNormalized,
       };
