@@ -17,7 +17,7 @@ import { calcAllUsersData } from "../calcSystem/calcSystem";
 const db_path = path.resolve(__dirname, "../db/db.json");
 console.log(db_path);
 
-async function start() {
+export async function runQuerySystem() {
   try {
     console.log(chalk.bold.greenBright("### Starting Query System .. ###"));
 
@@ -65,4 +65,4 @@ async function start() {
   }
 }
 
-start();
+runQuerySystem();
