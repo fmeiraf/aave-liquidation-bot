@@ -1,6 +1,6 @@
 import { task } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
-// import { INFURA_KOVAN } from "../env";
+import { NETWORK } from "../env";
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -24,7 +24,10 @@ export default {
   networks: {
     hardhat: {
       forking: {
-        url: "https://kovan.infura.io/v3/478245303595403cbe68cac2bf93d93b",
+        url:
+          NETWORK === "kovan"
+            ? "https://kovan.infura.io/v3/478245303595403cbe68cac2bf93d93b"
+            : "https://mainnet.infura.io/v3/478245303595403cbe68cac2bf93d93b",
       },
     },
   },
