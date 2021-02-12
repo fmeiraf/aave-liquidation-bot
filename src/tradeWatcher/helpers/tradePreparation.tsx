@@ -123,7 +123,14 @@ async function prepareTrades(candidatesArray: UserVitals[]) {
       }
     })
   );
-  return scannedCandidates;
+
+  const potentialTrades = _.orderBy(
+    scannedCandidates,
+    ["maxRawardInEth"],
+    ["desc"]
+  );
+
+  return potentialTrades;
 }
 
 export default prepareTrades;
