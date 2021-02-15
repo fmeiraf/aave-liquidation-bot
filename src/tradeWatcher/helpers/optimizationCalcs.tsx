@@ -105,12 +105,14 @@ export async function getBestDebtAsset(
   return winnerDebtAsset;
 }
 
-export async function gestBestCollateral(
+export async function getBestCollateral(
   userAddress: string,
   userDataDB: User,
   protocolDataProviderContract: Contract,
   priceOracleContract: Contract,
-  debtInEthRaw: any
+  uniswapFactoryContract: Contract,
+  debtInEthRaw: any,
+  bestDebtAssetAddress: string
 ) {
   const userCollaterals = _.filter(userDataDB["reserves"], {
     usageAsCollateralEnabledOnUser: true,
@@ -122,6 +124,13 @@ export async function gestBestCollateral(
         ethers.utils.getAddress(userCollateral["reserve"]["underlyingAsset"]),
         ethers.utils.getAddress(userAddress)
       );
+
+      const uniswapPoolCheck = await uniswapFactoryContract.getPair(
+        bestDebtAssetAddress,
+        userCollateral["reserve"]["underlyingAsset"]
+      );
+
+      const nullAddress = "0x0000000000000000000000000000000000000000";
 
       const collateralBalance = userReserveOnChain["currentATokenBalance"];
 
@@ -174,12 +183,18 @@ export async function gestBestCollateral(
         ),
         collateralPotentialGain: collateralGain,
         collateralNeedCoverage: collateralNeeded / collateralBalanceNormalized,
+        hasUniswapPool: uniswapPoolCheck !== nullAddress,
       };
     })
   );
 
+  const filteredTrades = _.filter(userCollateralAssetsInEth, [
+    "hasUniswapPool",
+    true,
+  ]);
+
   const winnerCollateralAsset = _.orderBy(
-    userCollateralAssetsInEth,
+    filteredTrades,
     ["collateralNeedCoverage"],
     ["desc"]
   )[0];

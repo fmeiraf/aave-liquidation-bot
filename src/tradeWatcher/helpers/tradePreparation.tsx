@@ -5,9 +5,10 @@ import abiAddress from "../../ABIs/abiAddress";
 import LendingPoolABI from "../../ABIs/LendingPool.json";
 import ProtocolDAtaProviderABI from "../../ABIs/ProtocolDataProvider.json";
 import PriceOracleABI from "../../ABIs/PriceOracle.json";
+import UniswapV2FactoryABI from "../../ABIs/UniswapV2Factory.json";
 import { normalize } from "../../calcSystem/helpers/pool-math";
 // import BigNumber from "bignumber.js";
-import { getBestDebtAsset, gestBestCollateral } from "./optimizationCalcs";
+import { getBestDebtAsset, getBestCollateral } from "./optimizationCalcs";
 import { NETWORK } from "../../env";
 
 import _ from "lodash";
@@ -59,6 +60,14 @@ async function prepareTrades(candidatesArray: UserVitals[]) {
     provider
   );
 
+  const uniswapFactory = new ethers.Contract(
+    NETWORK === "kovan"
+      ? abiAddress["UniswapV2Factory"]["kovan"]
+      : abiAddress["UniswapV2Factory"]["mainnet"],
+    UniswapV2FactoryABI,
+    provider
+  );
+
   const scannedCandidates = await Promise.all(
     _.map(candidatesArray, async (candidateData: UserVitals) => {
       // double check healthFactor
@@ -94,12 +103,14 @@ async function prepareTrades(candidatesArray: UserVitals[]) {
               priceOracle
             );
 
-            const bestCollateralAsset = await gestBestCollateral(
+            const bestCollateralAsset = await getBestCollateral(
               candidateData.id,
               userDataDB,
               protocolDataProvider,
               priceOracle,
-              bestDebtAsset["currentTotalDebtEthRaw"]
+              uniswapFactory,
+              bestDebtAsset["currentTotalDebtEthRaw"],
+              bestDebtAsset.debtAssetAddress
             );
 
             return {

@@ -11,6 +11,10 @@ const abiAddress = {
     kovan: "0xB8bE51E6563BB312Cbb2aa26e352516c25c26ac1",
     mainnet: "0xA50ba011c48153De246E5192C8f9258A2ba79Ca9",
   },
+  UniswapV2Factory: {
+    kovan: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
+    mainnet: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
+  },
 };
 
 export default abiAddress;
