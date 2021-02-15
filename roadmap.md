@@ -7,9 +7,9 @@ X - create script to get updated reserve data
 X - update aave-js package to use the new Graphs (old one is using different fields)
 X - find minimal calculation to keep in the db to classify potential liquidation opportunities
 X - use aave-js package to calculate parameters and create a queue for liquidation
+X - create solidity code for the flash loan call
+X - use hardhat to create a test for executing the transaction on a given block
 
-- create solidity code for the flash loan call
-- use hardhat to create a test for executing the transaction on a given block
 - make the query and calc scripts run on background
 - Find a way to execute the transaction on my node
 - deploy bot
