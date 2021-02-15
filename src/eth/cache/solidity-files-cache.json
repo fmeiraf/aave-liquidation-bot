@@ -431,7 +431,7 @@
       ]
     },
     "/Users/fernandomeira/projects/aave-liquidation/src/eth/contracts/Liquidator.sol": {
-      "lastModificationDate": 1612932767807,
+      "lastModificationDate": 1613414954648,
       "contentHash": "cb1ed8b74c0ad19e06df0c95ac0774ea",
       "sourceName": "contracts/Liquidator.sol",
       "solcConfig": {
@@ -575,6 +575,47 @@
       ],
       "artifacts": [
         "IUniswapV2Router01"
+      ]
+    },
+    "/Users/fernandomeira/projects/aave-liquidation/src/eth/contracts/LiquidatorDebug.sol": {
+      "lastModificationDate": 1613415045404,
+      "contentHash": "ef694e3fd5dab88ea8296099645ea82a",
+      "sourceName": "contracts/LiquidatorDebug.sol",
+      "solcConfig": {
+        "version": "0.6.12",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "hardhat/console.sol",
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "./FlashLoanReceiverBase.sol",
+        "../interfaces/IUniswapV2Router02.sol",
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        "../interfaces/ILendingPoolAddressesProvider.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.0 <0.7.0"
+      ],
+      "artifacts": [
+        "LiquidatorDebug"
       ]
     }
   }
