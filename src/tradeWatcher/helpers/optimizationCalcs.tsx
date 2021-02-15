@@ -4,10 +4,7 @@ import BigNumber from "bignumber.js";
 
 import { normalize } from "../../calcSystem/helpers/pool-math";
 import { User, UserReserve } from "../../querySystem/dbTypes";
-import {
-  valueToBigNumber,
-  // BigNumberValue,
-} from "../../calcSystem/helpers/bignumber";
+// import { valueToZDBigNumber } from "../../calcSystem/helpers/bignumber";
 
 export async function getBestDebtAsset(
   userAddress: string,
@@ -35,10 +32,14 @@ export async function getBestDebtAsset(
           "currentVariableDebt"
         ];
 
-        let currentTotalDebt = valueToBigNumber("0");
+        let currentTotalDebt = new BigNumber("0");
         currentTotalDebt = currentTotalDebt
           .plus(currentStableDebt.toString())
           .plus(currentVariableDebt.toString());
+
+        const debtValueForLiquidatation = currentTotalDebt
+          .multipliedBy(1.1)
+          .decimalPlaces(0, 1); // to guarantee in the flashLoan call that this will be enough
 
         const debtEthPrice = await priceOracleContract.getAssetPrice(
           ethers.utils.getAddress(userReserve["reserve"]["underlyingAsset"])
@@ -75,6 +76,7 @@ export async function getBestDebtAsset(
             userReserve["reserve"]["underlyingAsset"]
           ),
           currentTotalDebtEth: parseFloat(currentTotalDebtInEth),
+          debtValueForLoan: debtValueForLiquidatation.toString(),
           currentTotalDebtEthRaw: currentTotalDebtInEthRaw,
           maxRawardInEth:
             parseFloat(currentTotalDebtInEth) * 0.5 * liquidationBonus,
@@ -85,6 +87,7 @@ export async function getBestDebtAsset(
           debtAsset: userReserve["reserve"]["symbol"],
           debtAssetAddress: userReserve["reserve"]["underlyingAsset"],
           currentTotalDebtEth: 0,
+          debtValueForLoan: "",
           currentTotalDebtEthRaw: 0,
           maxRawardInEth: 0,
         };
