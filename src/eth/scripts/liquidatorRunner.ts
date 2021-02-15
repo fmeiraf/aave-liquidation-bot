@@ -5,6 +5,7 @@ import { normalize } from "../../calcSystem/helpers/pool-math";
 import abiAdress from "../../ABIs/abiAddress";
 import { BigNumber } from "bignumber.js";
 import chalk from "chalk";
+import tradeData from "./tradeData.json";
 
 // import { Signer, Contract } from "ethers";
 
@@ -23,20 +24,9 @@ async function main() {
   console.log(chalk.magenta("Liquidator deployed to:"), Liquidator.address);
 
   // ### running the contract liquidation ####
-  const tradeData = {
-    user: "0x6d84264A7bD2Cffa4A117BA2350403b3A9866949",
-    debtAsset: "WETH",
-    debtAssetAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    currentTotalDebtEth: 2.3820594881869583,
-    debtValueForLoan: "2620265437005654361",
-    // currentTotalDebtEthRaw: BigNumber { s: 1, e: 18, c: [Array] },
-    // maxRawardInEth: 0.12505812312981532,
-    // collateralAsset: 'DAI',
-    collateralAssetAddress: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
-    // collateralPotentialGain: 227.60186934411118,
-    // collateralNeedCoverage: 0.9770844094145993,
-    // type: 'sucess'
-  };
+  console.log(chalk.bgMagenta("###Got best trade possible for test"));
+
+  console.log(tradeData);
 
   // make user checks on chain to see if the fork is getting all the correct numbers
 
