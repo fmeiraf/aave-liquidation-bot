@@ -18,9 +18,12 @@ export async function findTrades() {
   // check potential candidates and prepare their call data
   const potentialTrades = await prepareTrades(usersUnderHF);
 
-  console.log(potentialTrades);
-
   return potentialTrades;
 }
 
-findTrades();
+async function run() {
+  const alltrades = await findTrades();
+  console.log(alltrades);
+}
+
+run();
