@@ -27,7 +27,7 @@ export default {
         url:
           NETWORK === "kovan"
             ? "https://kovan.infura.io/v3/478245303595403cbe68cac2bf93d93b"
-            : "https://mainnet.infura.io/v3/478245303595403cbe68cac2bf93d93b",
+            : "https://eth-mainnet.alchemyapi.io/v2/hDZs3CZ9qroO1Pb4opDGQ3zXw4FoF9f-",
       },
     },
   },
