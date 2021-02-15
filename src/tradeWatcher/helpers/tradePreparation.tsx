@@ -109,18 +109,37 @@ async function prepareTrades(candidatesArray: UserVitals[]) {
             };
           } else {
             return {
-              user: candidateData["id"],
-              type: "Fail",
-              liquidationOpportunityEth: 0,
-              totalDebtEth: 0,
-              asset: "",
-              obs: "user no found on DB",
+              user: ethers.utils.getAddress(candidateData.id),
+              debtAsset: "",
+              debtAssetAddress: "",
+              currentTotalDebtEth: 0,
+              debtValueForLoan: "",
+              currentTotalDebtEthRaw: 0,
+              maxRawardInEth: 0,
+              collateralAsset: "",
+              collateralAssetAddress: "",
+              collateralPotentialGain: 0,
+              collateralNeedCoverage: 0,
+              type: "fail - couldn't find on DB",
             };
           }
         }
       } catch (error) {
         console.log(error);
-        return "error";
+        return {
+          user: ethers.utils.getAddress(candidateData.id),
+          debtAsset: "",
+          debtAssetAddress: "",
+          currentTotalDebtEth: 0,
+          debtValueForLoan: "",
+          currentTotalDebtEthRaw: 0,
+          maxRawardInEth: 0,
+          collateralAsset: "",
+          collateralAssetAddress: "",
+          collateralPotentialGain: 0,
+          collateralNeedCoverage: 0,
+          type: "fail - couldn't run preparation calculations",
+        };
       }
     })
   );
