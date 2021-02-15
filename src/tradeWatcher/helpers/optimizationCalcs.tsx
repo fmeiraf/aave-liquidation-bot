@@ -4,7 +4,6 @@ import BigNumber from "bignumber.js";
 
 import { normalize } from "../../calcSystem/helpers/pool-math";
 import { User, UserReserve } from "../../querySystem/dbTypes";
-// import { valueToZDBigNumber } from "../../calcSystem/helpers/bignumber";
 
 export async function getBestDebtAsset(
   userAddress: string,
@@ -37,8 +36,10 @@ export async function getBestDebtAsset(
           .plus(currentStableDebt.toString())
           .plus(currentVariableDebt.toString());
 
+        BigNumber.set({ EXPONENTIAL_AT: 25 }); // avoid scientific notation to prevent erros passing this to onChain calls
+
         const debtValueForLiquidatation = currentTotalDebt
-          .multipliedBy(1.1)
+          .multipliedBy(1.05)
           .decimalPlaces(0, 1); // to guarantee in the flashLoan call that this will be enough
 
         const debtEthPrice = await priceOracleContract.getAssetPrice(
