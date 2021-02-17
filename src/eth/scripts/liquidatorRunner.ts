@@ -20,6 +20,9 @@ async function main() {
     "0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5"
   );
 
+  const liquidatorOwner = await Liquidator.owner();
+  console.log("Liquidator owner is: ", liquidatorOwner);
+
   await Liquidator.deployed();
   console.log(chalk.magenta("Liquidator deployed to:"), Liquidator.address);
 
@@ -82,12 +85,14 @@ async function main() {
     tradeData.debtAssetAddress
   );
 
+  const accountToBeChecked = await accounts[0].getAddress();
+  console.log("account being checked is: ", accountToBeChecked);
   const initialCollateralTokenBalance = await tokenCollateralContract.balanceOf(
-    accounts[0].getAddress()
+    accountToBeChecked
   );
 
   const initialDebtTokenBalance = await tokenDebtContract.balanceOf(
-    accounts[0].getAddress()
+    accountToBeChecked
   );
 
   console.log(chalk.bgMagenta("###START Contract console.logs.."));
@@ -100,11 +105,11 @@ async function main() {
   console.log(chalk.bgMagenta("###END Contract console.logs.."));
 
   const finalCollateralTokenBalance = await tokenCollateralContract.balanceOf(
-    accounts[0].getAddress()
+    accountToBeChecked
   );
 
   const finalDebtTokenBalance = await tokenDebtContract.balanceOf(
-    accounts[0].getAddress()
+    accountToBeChecked
   );
 
   console.log(

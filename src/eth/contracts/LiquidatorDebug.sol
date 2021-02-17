@@ -26,7 +26,10 @@ contract LiquidatorDebug is Ownable, FlashLoanReceiverBase {
   struct DebugInfo {
     uint256 debtAssetInitialBalance;
     uint256 collateralBalanceAfterLiquidation;
+    uint256 debtAssetAfterLiquidation;
+    uint256 debtAmountNeedinSwap;
     uint256 debtAssetFinalBalance;
+    uint256 collateralBalanceAfterSwap;
   }
 
   function executeOperation(
@@ -55,7 +58,6 @@ contract LiquidatorDebug is Ownable, FlashLoanReceiverBase {
       debugInfo.debtAssetInitialBalance
     );
     //approving funds to be withdraw by Aave to pay the user debt
-    console.log("The Amount of debt being paid ", amounts[0]);
     require(
       IERC20(assets[0]).approve(address(LENDING_POOL), amounts[0]),
       "Approval error"
@@ -68,6 +70,10 @@ contract LiquidatorDebug is Ownable, FlashLoanReceiverBase {
       liquidableUser,
       uint256(-1),
       false
+    );
+
+    debugInfo.debtAssetAfterLiquidation = IERC20(assets[0]).balanceOf(
+      address(this)
     );
 
     //swaping collateral for debt to pay the flashLoan
@@ -96,9 +102,24 @@ contract LiquidatorDebug is Ownable, FlashLoanReceiverBase {
       ),
       "Approval error"
     );
-    uniswapRouter.swapExactTokensForTokens(
+    // uniswapRouter.swapExactTokensForTokens(
+    //   debugInfo.collateralBalanceAfterLiquidation,
+    //   0,
+    //   path,
+    //   address(this),
+    //   block.timestamp + 5
+    // );
+
+    debugInfo.debtAmountNeedinSwap = uint256(0)
+      .add(debugInfo.debtAssetInitialBalance)
+      .sub(debugInfo.debtAssetAfterLiquidation)
+      .add(premiums[0]);
+
+    console.log("Amount being asked for swap", debugInfo.debtAmountNeedinSwap);
+
+    uniswapRouter.swapTokensForExactTokens(
+      debugInfo.debtAmountNeedinSwap,
       debugInfo.collateralBalanceAfterLiquidation,
-      0,
       path,
       address(this),
       block.timestamp + 5
@@ -110,6 +131,21 @@ contract LiquidatorDebug is Ownable, FlashLoanReceiverBase {
     console.log(
       "The final debt balance in before paying fees",
       debugInfo.debtAssetFinalBalance
+    );
+
+    debugInfo.collateralBalanceAfterSwap = IERC20(collateralAddress).balanceOf(
+      address(this)
+    );
+
+    console.log(
+      "Collateral Balance after swap: ",
+      debugInfo.collateralBalanceAfterSwap
+    );
+
+    console.log("PRemium being paid", premiums[0]);
+    console.log(
+      "Premium / loan",
+      premiums[0].div(debugInfo.debtAssetInitialBalance)
     );
 
     // At the end of your logic above, this contract owes
@@ -156,6 +192,41 @@ contract LiquidatorDebug is Ownable, FlashLoanReceiverBase {
       onBehalfOf,
       params,
       referralCode
+    );
+    console.log("Finsihed flash loan");
+
+    // uint256 finalDebtAssetValue = IERC20(assets[0]).balanceOf(address(this));
+    // console.log(
+    //   "Final Debt asset value - After Flash Loan: ",
+    //   finalDebtAssetValue
+    // );
+
+    // require(finalDebtAssetValue > 0, "No balance to transfer");
+
+    // address ownerAddress = owner();
+
+    // require(
+    //   IERC20(address(debtAsset)).transfer(ownerAddress, finalDebtAssetValue),
+    //   "Tranfer didn't go through"
+    // );
+
+    uint256 finalCollateralAssetValue =
+      IERC20(address(collateralAddress)).balanceOf(address(this));
+    console.log(
+      "Final Collateral asset value - After Flash Loan: ",
+      finalCollateralAssetValue
+    );
+
+    require(finalCollateralAssetValue > 0, "No balance to transfer");
+
+    address ownerAddress = owner();
+
+    require(
+      IERC20(address(collateralAddress)).transfer(
+        ownerAddress,
+        finalCollateralAssetValue
+      ),
+      "Tranfer didn't go through"
     );
   }
 }

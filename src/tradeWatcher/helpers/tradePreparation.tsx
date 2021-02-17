@@ -85,6 +85,7 @@ async function prepareTrades(candidatesArray: UserVitals[]) {
           const idFail = ethers.utils.getAddress(candidateData.id);
           return {
             id: idFail,
+            userIdraw: candidateData.id,
             type: "Fail",
             reason: "Health Factor on chain above 1",
           };

@@ -55,8 +55,10 @@ export async function runQuerySystem() {
     console.log(chalk.bold.greenBright("### Starting Watch Mode .. ###"));
 
     // debug only
+    await updatePoolReserves();
+    await updateLastEventsTimestamps();
     await updateUsers();
-    calcAllUsersData();
+    await calcAllUsersData();
 
     // start querying for events of interest using the last index from
     // previous step
