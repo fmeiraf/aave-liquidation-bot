@@ -6,7 +6,9 @@
   "scripts": {
     "test": "tsdx test",
     "tsc": "tsc",
-    "tsc-watch": "tsc --watch"
+    "tsc-watch": "tsc --watch",
+    "start-db": "npx ts-node ./src/querySystem/querySystem.tsx",
+    "test-contract": "npx ts-node ./src/eth/scripts/prepareLiquidatorRunner.tsx && cd ./src/eth && npx hardhat run ./scripts/liquidatorRunner.ts"
   },
   "repository": {
     "type": "git",
