@@ -117,7 +117,7 @@ async function prepareTrades(candidatesArray: UserVitals[]) {
             return {
               ...bestDebtAsset,
               ...bestCollateralAsset,
-              type: "sucess",
+              type: "success",
             };
           } else {
             return {
@@ -156,8 +156,9 @@ async function prepareTrades(candidatesArray: UserVitals[]) {
     })
   );
 
+  const filteredCandidates = _.filter(scannedCandidates, ["type", "success"]);
   const potentialTrades = _.orderBy(
-    scannedCandidates,
+    filteredCandidates,
     ["maxRawardInEth"],
     ["desc"]
   );
