@@ -5,14 +5,11 @@ import { User } from "../dbTypes";
 import _ from "lodash";
 
 // query to get all userResere data from all users, pagination optimzed
-export const getAllUsers: any = async function(
-  n: number,
-  pagination: number
-): Promise<any> {
+export const getAllUsers: any = async function (lastID: string): Promise<any> {
   const result: any = await client.query({
     query: gql`
-      query getUsers($n: Int, $pagination: Int) {
-        users(first: $n, skip: $pagination) {
+      query getUsers($lastID: String) {
+        users(first: 1000, where: { id_gt: $lastID }) {
           id
           reserves {
             ...UserReserveData
@@ -21,7 +18,7 @@ export const getAllUsers: any = async function(
       }
       ${UserReserve.fragment}
     `,
-    variables: { n: n, pagination: pagination },
+    variables: { lastID: lastID },
   });
 
   if (result.data.users.length === 0) {
@@ -31,19 +28,19 @@ export const getAllUsers: any = async function(
   return result.data.users;
 };
 
-export const loadInitialUsers: any = async function() {
-  let n_: number = 100;
-  let pag_: number = 0;
+export const loadInitialUsers: any = async function () {
   let allUsers: Array<User> = [];
 
-  while (pag_ <= 50000) {
-    let new_content = await getAllUsers(n_, pag_);
+  let keepRunning = true;
+  let lastID = "";
+  while (keepRunning) {
+    let new_content = await getAllUsers(lastID);
 
     if (new_content === "Done") {
       break;
     }
+    lastID = new_content[new_content.length - 1]["id"];
     allUsers = allUsers.concat(new_content);
-    pag_ += 100;
   }
 
   console.log(`${allUsers.length} users added.`);
@@ -183,7 +180,7 @@ export const getUsersToUpdate: any = async (
   return _.uniq(usersToUpdate);
 };
 
-export const getUserData: any = async function(
+export const getUserData: any = async function (
   userAddress: string
 ): Promise<any> {
   const result = await client.query({
@@ -206,7 +203,7 @@ export const getUserData: any = async function(
   return result.data.user;
 };
 
-export const getReservesData: any = async function() {
+export const getReservesData: any = async function () {
   const result: any = await client.query({
     query: gql`
       query getReserves {
@@ -221,7 +218,7 @@ export const getReservesData: any = async function() {
   return result.data.reserves;
 };
 
-export const getBlockNumber: any = async function() {
+export const getBlockNumber: any = async function () {
   const result: any = await client.query({
     query: gql`
       query getBlockNumber {
