@@ -6,6 +6,7 @@ import LendingPoolABI from "../../ABIs/LendingPool.json";
 import ProtocolDAtaProviderABI from "../../ABIs/ProtocolDataProvider.json";
 import PriceOracleABI from "../../ABIs/PriceOracle.json";
 import UniswapV2FactoryABI from "../../ABIs/UniswapV2Factory.json";
+import UniswapV2RouterABI from "../../ABIs/UniswapV2Router02.json";
 import { normalize } from "../../calcSystem/helpers/pool-math";
 // import BigNumber from "bignumber.js";
 import { getBestDebtAsset, getBestCollateral } from "./optimizationCalcs";
@@ -68,6 +69,14 @@ async function prepareTrades(candidatesArray: UserVitals[]) {
     provider
   );
 
+  const uniswapRouter = new ethers.Contract(
+    NETWORK === "kovan"
+      ? abiAddress["UniswapV2Router02"]["kovan"]
+      : abiAddress["UniswapV2Router02"]["mainnet"],
+    UniswapV2RouterABI,
+    provider
+  );
+
   const scannedCandidates = await Promise.all(
     _.map(candidatesArray, async (candidateData: UserVitals) => {
       // double check healthFactor
@@ -110,14 +119,15 @@ async function prepareTrades(candidatesArray: UserVitals[]) {
               protocolDataProvider,
               priceOracle,
               uniswapFactory,
-              bestDebtAsset["currentTotalDebtEthRaw"],
-              bestDebtAsset.debtAssetAddress
+              uniswapRouter,
+              bestDebtAsset.currentTotalDebtRaw,
+              bestDebtAsset.debtAssetAddress,
+              bestDebtAsset.collateralCalcData
             );
 
             return {
               ...bestDebtAsset,
               ...bestCollateralAsset,
-              type: "success",
             };
           } else {
             return {

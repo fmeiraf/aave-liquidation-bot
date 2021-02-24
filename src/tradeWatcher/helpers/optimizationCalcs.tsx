@@ -76,9 +76,14 @@ export async function getBestDebtAsset(
           debtAssetAddress: ethers.utils.getAddress(
             userReserve["reserve"]["underlyingAsset"]
           ),
+          currentTotalDebtRaw: currentTotalDebt.toString(),
           currentTotalDebtEth: parseFloat(currentTotalDebtInEth),
           debtValueForLoan: debtValueForLiquidatation.toString(),
           currentTotalDebtEthRaw: currentTotalDebtInEthRaw,
+          collateralCalcData: [
+            debtEthPrice,
+            userReserve["reserve"]["decimals"],
+          ],
           maxRawardInEth:
             parseFloat(currentTotalDebtInEth) * 0.5 * liquidationBonus,
         };
@@ -87,9 +92,11 @@ export async function getBestDebtAsset(
           user: ethers.utils.getAddress(userAddress),
           debtAsset: userReserve["reserve"]["symbol"],
           debtAssetAddress: userReserve["reserve"]["underlyingAsset"],
+          currentTotalDebt: 0,
           currentTotalDebtEth: 0,
           debtValueForLoan: "",
           currentTotalDebtEthRaw: 0,
+          collateralCalcData: [],
           maxRawardInEth: 0,
         };
       }
@@ -111,8 +118,10 @@ export async function getBestCollateral(
   protocolDataProviderContract: Contract,
   priceOracleContract: Contract,
   uniswapFactoryContract: Contract,
-  debtInEthRaw: any,
-  bestDebtAssetAddress: string
+  uniswapRouterContract: Contract,
+  currentTotalDebt: any,
+  bestDebtAssetAddress: string,
+  debtAssetSuppordata: any[]
 ) {
   const userCollaterals = _.filter(userDataDB["reserves"], {
     usageAsCollateralEnabledOnUser: true,
@@ -125,12 +134,9 @@ export async function getBestCollateral(
         ethers.utils.getAddress(userAddress)
       );
 
-      const uniswapPoolCheck = await uniswapFactoryContract.getPair(
-        bestDebtAssetAddress,
-        userCollateral["reserve"]["underlyingAsset"]
-      );
+      BigNumber.set({ EXPONENTIAL_AT: 25 }); // avoid scientific notation to prevent erros passing this to onChain calls
 
-      const nullAddress = "0x0000000000000000000000000000000000000000";
+      // gathering important variables to be used during calculations
 
       const collateralBalance = userReserveOnChain["currentATokenBalance"];
 
@@ -138,66 +144,147 @@ export async function getBestCollateral(
         ethers.utils.getAddress(userCollateral["reserve"]["underlyingAsset"])
       );
 
-      const potentialCollateralGain = debtInEthRaw
-        .times(new BigNumber("10").pow(17).times(5).toString())
-        .times(
-          new BigNumber("10")
-            .pow(userCollateral["reserve"]["decimals"])
-            .toString()
-        )
-        .div(
-          collateralEthPrice
-            .mul(new BigNumber("10").pow(18).toString())
-            .toString()
-        );
-
       const liquidationBonus =
         parseFloat(userCollateral["reserve"]["reserveLiquidationBonus"]) /
         10 ** 5;
 
-      const collateralGain =
-        parseFloat(
-          normalize(
-            potentialCollateralGain.toString(),
-            userCollateral["reserve"]["decimals"]
-          )
-        ) * liquidationBonus;
+      // checking uniswap pool existence
+      const uniswapPoolCheck = await uniswapFactoryContract.getPair(
+        bestDebtAssetAddress,
+        userCollateral["reserve"]["underlyingAsset"]
+      );
 
-      const collateralNeeded = parseFloat(
-        normalize(
-          potentialCollateralGain.toString(),
-          userCollateral["reserve"]["decimals"]
+      const nullAddress = "0x0000000000000000000000000000000000000000";
+      let finalProfitInCollateralAsset = new BigNumber("0");
+      let finalProfitInEth = new BigNumber("0");
+      let collateralGainAfterLiq = new BigNumber("0");
+
+      if (uniswapPoolCheck !== nullAddress) {
+        // calculating swap from collateral to debt asset to know ow much the profit is
+        const premium = new BigNumber(currentTotalDebt)
+          .multipliedBy(1.05)
+          .multipliedBy(0.0009);
+
+        const amountToBePayed = await new BigNumber(
+          currentTotalDebt
+        ).multipliedBy(0.5);
+
+        //getting what will be the collateral liquidation target
+        const maxCollateralToLiquidate = new BigNumber("0")
+          .plus(amountToBePayed.toString())
+          .multipliedBy(debtAssetSuppordata[0].toString())
+          .multipliedBy(
+            new BigNumber("10")
+              .pow(userCollateral["reserve"]["decimals"])
+              .toString()
+          )
+          .multipliedBy(liquidationBonus)
+          .div(
+            new BigNumber("0")
+              .plus(collateralEthPrice.toString())
+              .multipliedBy(new BigNumber("10").pow(debtAssetSuppordata[1]))
+          )
+          .multipliedBy(10); //my result is getting one decimal off, probably liquidationBonus problem
+
+        //checking if it's possible to pay 50% given the amount of collateral available
+        // if debtAmountNeed < amountToBePayed = with the collateral availabe what we can liquidate is less than 50%
+
+        const collateralAmountTarget = maxCollateralToLiquidate.gt(
+          collateralBalance
         )
-      );
-      const collateralBalanceNormalized = parseFloat(
-        normalize(
-          collateralBalance.toString(),
-          userCollateral["reserve"]["decimals"]
-        )
-      );
+          ? collateralBalance
+          : maxCollateralToLiquidate;
+
+        collateralGainAfterLiq = collateralAmountTarget;
+
+        const debtAmountNeeded = await new BigNumber("0")
+          .plus(collateralAmountTarget.toString())
+          .multipliedBy(collateralEthPrice.toString())
+          .multipliedBy(
+            new BigNumber("10").pow(debtAssetSuppordata[1]).toString()
+          )
+          .div(
+            new BigNumber("0")
+              .plus(debtAssetSuppordata[0].toString())
+              .multipliedBy(
+                new BigNumber("10").pow(
+                  userCollateral["reserve"]["decimals"].toString()
+                )
+              )
+          )
+          .plus(liquidationBonus / 2)
+          .div(liquidationBonus * 10)
+          .decimalPlaces(0, 1);
+
+        const finalAmountToBePayed = debtAmountNeeded.lt(amountToBePayed)
+          ? debtAmountNeeded
+          : amountToBePayed;
+
+        const amountNeeded = await new BigNumber("0")
+          .plus(finalAmountToBePayed.toString())
+          .plus(premium.toString());
+
+        // says how many of collateral will be needed to pay for flash loan debt
+        const collateralNeededForSwap = await uniswapRouterContract.getAmountsIn(
+          amountNeeded.decimalPlaces(0, 1).toString(),
+          [
+            ethers.utils.getAddress(
+              userCollateral["reserve"]["underlyingAsset"]
+            ),
+            bestDebtAssetAddress,
+          ]
+        );
+
+        //after checkings it seems the problem is coming from the uniswap value, it seems higher that what I am seeing in the contrat call
+
+        const finalProfit = new BigNumber("0").plus(
+          collateralAmountTarget.minus(collateralNeededForSwap[0].toString())
+        );
+
+        finalProfitInCollateralAsset = finalProfit;
+
+        finalProfitInEth = finalProfitInCollateralAsset
+          .multipliedBy(collateralEthPrice.toString())
+          .div(
+            new BigNumber("10")
+              .pow(userCollateral["reserve"]["decimals"])
+              .toString()
+          );
+      }
+
+      const finalProfitInEthNorm = normalize(finalProfitInEth, 18);
 
       return {
         collateralAsset: userCollateral["reserve"]["symbol"],
         collateralAssetAddress: ethers.utils.getAddress(
           userCollateral["reserve"]["underlyingAsset"]
         ),
-        collateralPotentialGain: collateralGain,
-        collateralNeedCoverage: collateralNeeded / collateralBalanceNormalized,
+        collateralPotentialGain: collateralGainAfterLiq.toString(),
+        finalProfitInCollateralAsset: finalProfitInCollateralAsset.toString(),
+        finalProfitInEth: finalProfitInEth.toString(),
+        finalProfitInEthNormalized: parseFloat(finalProfitInEthNorm),
+        hasProfit: parseFloat(finalProfitInEthNorm) > 0 ? true : false,
         hasUniswapPool: uniswapPoolCheck !== nullAddress,
       };
     })
   );
 
-  const filteredTrades = _.filter(userCollateralAssetsInEth, [
-    "hasUniswapPool",
-    true,
-  ]);
+  const filteredTrades = _.filter(userCollateralAssetsInEth, {
+    hasUniswapPool: true,
+    hasProfit: true,
+  });
 
   const winnerCollateralAsset = _.orderBy(
     filteredTrades,
-    ["collateralNeedCoverage"],
+    ["finalProfitInEthNormalized"],
     ["desc"]
   )[0];
+
+  if (winnerCollateralAsset) {
+    return { ...winnerCollateralAsset, type: "success" };
+  } else {
+    type: "fail";
+  }
 
   return winnerCollateralAsset;
 }

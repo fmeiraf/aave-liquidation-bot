@@ -9,7 +9,7 @@ async function prepareTradeFile() {
 
   console.log(chalk.greenBright("Calculating better deals.."));
   const allTrades = await findTrades();
-  const bestTrade: any = allTrades[2];
+  const bestTrade: any = allTrades[0];
 
   fs.writeFile(
     "./src/eth/scripts/tradeData.json",
