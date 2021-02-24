@@ -115,6 +115,13 @@ contract LiquidatorDebug is Ownable, FlashLoanReceiverBase {
       .sub(debugInfo.debtAssetAfterLiquidation)
       .add(premiums[0]);
 
+    console.log(
+      "Amount payed for debt",
+      uint256(0).add(debugInfo.debtAssetInitialBalance).sub(
+        debugInfo.debtAssetAfterLiquidation
+      )
+    );
+
     console.log("Amount being asked for swap", debugInfo.debtAmountNeedinSwap);
 
     uniswapRouter.swapTokensForExactTokens(
