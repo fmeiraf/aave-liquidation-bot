@@ -578,8 +578,8 @@
       ]
     },
     "/Users/fernandomeira/projects/aave-liquidation/src/eth/contracts/LiquidatorDebug.sol": {
-      "lastModificationDate": 1613539254388,
-      "contentHash": "e0a3bba68d9a9fff7206913b05f259b6",
+      "lastModificationDate": 1613708808815,
+      "contentHash": "1f784348bd4fb5e5e0c90ef68e027ebd",
       "sourceName": "contracts/LiquidatorDebug.sol",
       "solcConfig": {
         "version": "0.6.12",
