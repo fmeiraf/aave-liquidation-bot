@@ -4,23 +4,45 @@ pragma experimental ABIEncoderV2;
 
 import "hardhat/console.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { FlashLoanReceiverBase } from "./FlashLoanReceiverBase.sol";
 import { IUniswapV2Router02 } from "../interfaces/IUniswapV2Router02.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {
   ILendingPoolAddressesProvider
 } from "../interfaces/ILendingPoolAddressesProvider.sol";
 
 contract Liquidator is Ownable, FlashLoanReceiverBase {
+  using SafeMath for uint256;
+  using SafeERC20 for IERC20;
+
   IUniswapV2Router02 public uniswapRouter;
   address public UNISWAP_ROUTER_ADDRESS =
     0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
+
+  address private PROFIT_RECIPIENT = 0xAeA2dF19506eA7bc1b3AA82f29a3115c77f0c21e;
 
   constructor(ILendingPoolAddressesProvider _addressProvider)
     public
     FlashLoanReceiverBase(_addressProvider)
   {
     uniswapRouter = IUniswapV2Router02(UNISWAP_ROUTER_ADDRESS);
+  }
+
+  function changeProfitRecipient(address recipient) public onlyOwner {
+    PROFIT_RECIPIENT = recipient;
+  }
+
+  function getProfitRecipient() public view returns (address) {
+    return PROFIT_RECIPIENT;
+  }
+
+  struct TradeInfo {
+    uint256 debtAssetInitialBalance;
+    uint256 collateralBalanceAfterLiquidation;
+    uint256 debtAssetAfterLiquidation;
+    uint256 debtAmountNeedinSwap;
   }
 
   function executeOperation(
@@ -35,9 +57,15 @@ contract Liquidator is Ownable, FlashLoanReceiverBase {
     // Your logic goes here.
     //
 
+    TradeInfo memory tradeInfo;
+
     //decoding final params
     (address collateralAddress, address liquidableUser) =
       abi.decode(params, (address, address));
+
+    tradeInfo.debtAssetInitialBalance = IERC20(assets[0]).balanceOf(
+      address(this)
+    );
 
     //approving funds to be withdraw by Aave to pay the user debt
     require(
@@ -54,29 +82,41 @@ contract Liquidator is Ownable, FlashLoanReceiverBase {
       false
     );
 
+    // checking collateral and debt token balance after liquidation
+    tradeInfo.debtAssetAfterLiquidation = IERC20(assets[0]).balanceOf(
+      address(this)
+    );
+
+    tradeInfo.collateralBalanceAfterLiquidation = IERC20(collateralAddress)
+      .balanceOf(address(this));
+
     //swaping collateral for debt to pay the flashLoan
     address[] memory path = new address[](2);
     path[0] = collateralAddress;
     path[1] = assets[0];
 
-    // checking collateral balance after liquidation
-    uint256 collateralBalance =
-      IERC20(collateralAddress).balanceOf(address(this));
-    require(collateralBalance > uint256(0), "There is no collateral balance");
-
-    console.log(collateralBalance);
+    require(
+      tradeInfo.collateralBalanceAfterLiquidation > uint256(0),
+      "There is no collateral balance"
+    );
 
     // aproving funds to be pulled by Uni + swaping collateral by debt asset
     require(
       IERC20(collateralAddress).approve(
         address(UNISWAP_ROUTER_ADDRESS),
-        collateralBalance
+        tradeInfo.collateralBalanceAfterLiquidation
       ),
       "Approval error"
     );
-    uniswapRouter.swapExactTokensForTokens(
-      collateralBalance,
-      0,
+
+    tradeInfo.debtAmountNeedinSwap = uint256(0)
+      .add(tradeInfo.debtAssetInitialBalance)
+      .sub(tradeInfo.debtAssetAfterLiquidation)
+      .add(premiums[0]);
+
+    uniswapRouter.swapTokensForExactTokens(
+      tradeInfo.debtAmountNeedinSwap,
+      tradeInfo.collateralBalanceAfterLiquidation,
       path,
       address(this),
       block.timestamp + 5
@@ -126,6 +166,21 @@ contract Liquidator is Ownable, FlashLoanReceiverBase {
       onBehalfOf,
       params,
       referralCode
+    );
+
+    uint256 finalCollateralAssetValue =
+      IERC20(address(collateralAddress)).balanceOf(address(this));
+
+    require(finalCollateralAssetValue > 0, "No balance to transfer");
+
+    address profitRecipient = getProfitRecipient();
+
+    require(
+      IERC20(address(collateralAddress)).transfer(
+        profitRecipient,
+        finalCollateralAssetValue
+      ),
+      "Tranfer didn't go through"
     );
   }
 }
