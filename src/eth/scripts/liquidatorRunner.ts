@@ -114,13 +114,13 @@ async function main() {
 
   console.log(
     chalk.greenBright(
-      `Initial Balance: ${initialCollateralTokenBalance}. Final Balance: ${finalCollateralTokenBalance}`
+      `COLLATERAL: Initial Balance: ${initialCollateralTokenBalance}. Final Balance: ${finalCollateralTokenBalance}`
     )
   );
 
   console.log(
     chalk.greenBright(
-      `Initial Balance: ${initialDebtTokenBalance}. Final Balance: ${finalDebtTokenBalance}`
+      `DEBT: Initial Balance: ${initialDebtTokenBalance}. Final Balance: ${finalDebtTokenBalance}`
     )
   );
 }
