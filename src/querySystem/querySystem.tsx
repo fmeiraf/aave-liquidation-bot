@@ -56,8 +56,8 @@ export async function runQuerySystem() {
 
     // debug only
     await updatePoolReserves();
-    await updateLastEventsTimestamps();
     await updateUsers();
+    await updateLastEventsTimestamps();
     await calcAllUsersData();
 
     // start querying for events of interest using the last index from

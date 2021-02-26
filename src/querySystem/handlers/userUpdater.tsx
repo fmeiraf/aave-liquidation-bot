@@ -52,21 +52,13 @@ const updateUsers = async () => {
   for (var user of usersToUpdate) {
     const userData = await getUserData(user);
 
-    const checkUserExistence = db
-      .get("users")
-      .find({ id: user })
-      .value();
+    const checkUserExistence = db.get("users").find({ id: user }).value();
 
     if (checkUserExistence === undefined) {
-      db.get("users")
-        .push(userData)
-        .write();
+      db.get("users").push(userData).write();
       newUsersAdded += 1;
     } else {
-      db.get("users")
-        .find({ id: user })
-        .assign(userData)
-        .write();
+      db.get("users").find({ id: user }).assign(userData).write();
       userUpdates += 1;
     }
   }
