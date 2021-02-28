@@ -12,6 +12,14 @@ import updateUsers from "./handlers/userUpdater";
 import { calcAllUsersData } from "../calcSystem/calcSystem";
 
 // types for the db schema
+async function updateMode() {
+  const now = new Date();
+  console.log(`This update is running on ${now.toString()} `);
+  await updatePoolReserves();
+  await updateUsers();
+  await updateLastEventsTimestamps();
+  await calcAllUsersData();
+}
 
 // GOTCHA: path relative to the build folder..
 const db_path = path.resolve(__dirname, "../db/db.json");
@@ -54,14 +62,7 @@ export async function runQuerySystem() {
 
     console.log(chalk.bold.greenBright("### Starting Watch Mode .. ###"));
 
-    // debug only
-    await updatePoolReserves();
-    await updateUsers();
-    await updateLastEventsTimestamps();
-    await calcAllUsersData();
-
-    // start querying for events of interest using the last index from
-    // previous step
+    setInterval(await updateMode, 2 * 60 * 1000);
   } catch (error) {
     console.log(error);
   }
