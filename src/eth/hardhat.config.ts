@@ -1,6 +1,11 @@
 import { task } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
-import { NETWORK } from "../env";
+import {
+  NETWORK,
+  KOVAN_PRIVATE_KEY,
+  INFURA_KOVAN,
+  ALCHEMY_MAINNET,
+} from "../env";
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -24,11 +29,12 @@ export default {
   networks: {
     hardhat: {
       forking: {
-        url:
-          NETWORK === "kovan"
-            ? "https://kovan.infura.io/v3/478245303595403cbe68cac2bf93d93b"
-            : "https://eth-mainnet.alchemyapi.io/v2/hDZs3CZ9qroO1Pb4opDGQ3zXw4FoF9f-",
+        url: NETWORK === "kovan" ? INFURA_KOVAN : ALCHEMY_MAINNET,
       },
+    },
+    kovan: {
+      url: INFURA_KOVAN,
+      accounts: [`0x${KOVAN_PRIVATE_KEY}`],
     },
   },
 };
