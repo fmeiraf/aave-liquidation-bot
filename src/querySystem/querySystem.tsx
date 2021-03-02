@@ -12,7 +12,7 @@ import updateUsers from "./handlers/userUpdater";
 import { calcAllUsersData } from "../calcSystem/calcSystem";
 
 // types for the db schema
-async function updateMode() {
+export async function updateMode() {
   const now = new Date();
   console.log(`This update is running on ${now.toString()} `);
   await updatePoolReserves();
@@ -62,6 +62,7 @@ export async function runQuerySystem() {
 
     console.log(chalk.bold.greenBright("### Starting Watch Mode .. ###"));
 
+    await updateMode();
     setInterval(await updateMode, 2 * 60 * 1000);
   } catch (error) {
     console.log(error);
