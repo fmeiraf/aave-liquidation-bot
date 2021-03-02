@@ -17,7 +17,7 @@ async function main() {
     "LiquidatorDebug"
   );
   const Liquidator = await liquidatorArtifacts.deploy(
-    "0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5"
+    abiAdress["LendingPoolAddressProvider"]["mainnet"]
   );
 
   const liquidatorOwner = await Liquidator.owner();
