@@ -2,7 +2,6 @@ import { dbConn } from "../dbConnection";
 import _ from "lodash";
 
 import prepareTrades from "./helpers/tradePreparation";
-// import { normalize } from "../calcSystem/helpers/pool-math";
 
 export async function findTrades() {
   const data = dbConn.get("userVitals").value();
@@ -20,10 +19,3 @@ export async function findTrades() {
 
   return potentialTrades;
 }
-
-async function run() {
-  const alltrades = await findTrades();
-  console.log(alltrades);
-}
-
-run();

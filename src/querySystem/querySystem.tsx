@@ -23,7 +23,6 @@ export async function updateMode() {
 
 // GOTCHA: path relative to the build folder..
 const db_path = path.resolve(__dirname, "../db/db.json");
-console.log(db_path);
 
 export async function runQuerySystem() {
   try {
@@ -68,5 +67,3 @@ export async function runQuerySystem() {
     console.log(error);
   }
 }
-
-runQuerySystem();
