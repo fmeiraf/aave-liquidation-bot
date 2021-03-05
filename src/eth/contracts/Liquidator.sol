@@ -21,7 +21,7 @@ contract Liquidator is Ownable, FlashLoanReceiverBase {
   address public UNISWAP_ROUTER_ADDRESS =
     0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
 
-  address private PROFIT_RECIPIENT = 0xAeA2dF19506eA7bc1b3AA82f29a3115c77f0c21e;
+  address private PROFIT_RECIPIENT = 0x3A1733DE64fdE944c40421876865cD5a7cbE1418;
 
   constructor(ILendingPoolAddressesProvider _addressProvider)
     public
