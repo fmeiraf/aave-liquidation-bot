@@ -7,7 +7,7 @@
     "test": "tsdx test",
     "tsc": "tsc",
     "tsc-watch": "tsc --watch",
-    "start-db": "npx ts-node ./src/querySystem/querySystem.tsx",
+    "start-db": "npx ts-node ./src/querySystem/queryRunner.tsx",
     "test-contract": "npx ts-node ./src/eth/scripts/prepareLiquidatorRunner.tsx && cd ./src/eth && npx hardhat run ./scripts/liquidatorRunner.ts"
   },
   "repository": {
