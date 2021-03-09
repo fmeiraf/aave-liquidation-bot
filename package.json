@@ -8,6 +8,7 @@
     "tsc": "tsc",
     "tsc-watch": "tsc --watch",
     "start-db": "npx ts-node ./src/querySystem/queryRunner.tsx",
+    "execute-trades": "npx ts-node ./src/tradeWatcher/tradeExecutioner.tsx",
     "test-contract": "npx ts-node ./src/eth/scripts/prepareLiquidatorRunner.tsx && cd ./src/eth && npx hardhat run ./scripts/liquidatorRunner.ts"
   },
   "repository": {
