@@ -1,6 +1,8 @@
+
+
 # Aave Liquidation Bot
 
-This is an an Aave liquidation bot using Flash Loans :)
+This is an Aave liquidation bot using Flash Loans :)
 
 ### Instructions to run this
 
